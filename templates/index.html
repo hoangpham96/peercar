@@ -1,0 +1,15 @@
+{% include 'top.html' %}
+    <div id="content">
+        <!--
+            Simple login form, the thing you want to pay attention to is
+            the method and the action, it shows you what's happening
+        -->
+        <form class="pure-form pure-form-stacked login" method="POST" action="{{ url_for('login') }}">
+            <h2>Log in</h2>
+            <input type="text" name="sid" placeholder="Student ID" required>
+            <input type="password" name="password" placeholder="Password">
+            <input class="pure-button pure-button-primary" type="submit">
+        </form>
+    </div>
+</body>
+</html>

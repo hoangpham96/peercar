@@ -1,0 +1,29 @@
+{% include 'top.html' %}
+<div id="content">
+    <div id="container">
+        <h1 class="page-title">Units of Study Available</h1>
+        <table class="pure-table">
+            <thead>
+                <tr><th>UOS Code</th><th>UOS Name</th><th>Credits</th><th>Year</th><th>Semester</th></tr>
+            </thead>
+            <tbody>
+                <!-- This part is really important,
+                        it loops through every row in
+                        the 'units of study' rows
+                        returned from our query
+                -->
+                {% for unit in units %}
+                    <tr>
+                        <td> {{unit['uoscode']}} </td>
+                        <td> {{unit['uosname']}} </td>
+                        <td> {{unit['credits']}} </td>
+                        <td> {{unit['year']}} </td>
+                        <td> {{unit['semester']}} </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
