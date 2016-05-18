@@ -1,36 +1,39 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <!-- this goes to the 'static' folder and grabs our CSS -->
-        <!-- [Brief Intro:] CSS is how we make the websites look nicer -->
-        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/pure.css') }}">
-        <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/main.css') }}">
-        <title>{{ page.title }}</title>
+        <title>Peer Car</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/pure.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/grid.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+        <script src="{{ url_for('static', filename='scripts/jquery.js') }}"></script>
     </head>
     <body>
-        <!-- Generating the menu and what happens when the user is logged in VS logged out -->
-        <div id="header" class="pure-menu pure-menu-horizontal">
-            <a href="/" class="pure-menu-heading pure-menu-link">UniDB</a>
-            {% if session.logged_in %}
-            <ul class="pure-menu-list">
-                <li class="pure-menu-item"><a href="{{ url_for('list_units') }}" class="pure-menu-link">All Units</a></li>
-                <li class="pure-menu-item"><a href="{{ url_for('transcript') }}" class="pure-menu-link">Transcript</a></li>
-                <li class="pure-menu-item"><a href="{{ url_for('logout')}}" class="pure-menu-link">Logout</a></li>
-            </ul>
-            {% endif %}
-            <div id="top-unikey">{{ page.unikey }}</div>
-        </div>
-        <!--
-            This is for our flashed messages
-            Whenever we use flash('message in here')
-            it will come out inside this list
-        -->
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-            <ul class=flashes>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-            </ul>
-          {% endif %}
-        {% endwith %}
+        <div class="body-container">
+            <header class="page-header">
+                <div class="container">
+                    <div class="title">
+                        <a href="/"><span class="inner"></span></a>
+                    </div>
+                    <ul class="page-nav">
+                        {% if session.logged_in %}
+                        <li><a href="{{ url_for('list_bays')}}">Bays</a></li>
+                        <li><a href="{{ url_for('new_booking')}}">New Booking</a></li>
+                        <li><a href="{{ url_for('my_bookings')}}">My Bookings</a></li>
+                        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </header>
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                {% if page.bar == True %}
+                <ul class="flashes" style="background-color: #0B0">
+                {% else %}
+                <ul class="flashes" style="background-color: #B00">
+                {% endif %}
+                {% for message in messages %}
+                  <li>{{ message }}</li>
+                {% endfor %}
+                </ul>
+              {% endif %}
+            {% endwith %}
