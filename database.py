@@ -55,9 +55,13 @@ def check_login(email, password):
         if (result is None):
             return None
 
+
         # Stored hash includes salt and hash of password
+
         stored_hash = result[3].encode(encoding='ascii')
-        if (bcrypt.hashpw(password.encode(encoding = 'ascii'), stored_hash) == stored_hash):
+        pwd = password.encode(encoding = 'ascii')
+        print(pwd)
+        if (bcrypt.hashpw(pwd, stored_hash) == stored_hash):
             return result
         else:
             return None
