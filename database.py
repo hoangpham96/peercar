@@ -2,7 +2,7 @@
 
 from modules import pg8000
 import configparser
-
+import bcrypt
 
 # Define some useful variables
 ERROR_CODE = 55929
@@ -36,7 +36,7 @@ def database_connect():
 ##  Login
 #####################################################
 
-def check_login(emailNickname, password):
+def check_login(email, password):
     # Check if the user details are correct!
 
     # Ask for the database connection, and get the cursor set up
@@ -49,12 +49,21 @@ def check_login(emailNickname, password):
         # Try executing the SQL and get from the database
         sql = """SELECT *
                  FROM Member
-                 WHERE (email=%s OR nickname=%s) AND password=%s"""
-        cur.execute(sql, (emailNickname, emailNickname, password))
-        r = cur.fetchone()
+                 WHERE email=%s OR nickname =%s"""
+        cur.execute(sql, (email, email))
+        result = cur.fetchone()
+        if (result is None):
+            return None
+
+        # Stored hash includes salt and hash of password
+        stored_hash = result[3].encode(encoding='ascii')
+        if (bcrypt.hashpw(password.encode(encoding = 'ascii'), stored_hash) == stored_hash):
+            return result
+        else:
+            return None
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
-        return r
+        
     except:
         # If there were any errors, return a NULL row printing an error to the debug
         print("Error with Database")
