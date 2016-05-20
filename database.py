@@ -82,28 +82,6 @@ def check_login(email, password):
 def update_homebay(email, bayname):
     # TODO
     # Update the user's homebay
-
-    # Ask for the database connection, and get the cursor set up
-    conn = database_connect()
-    if(conn is None):
-        return ERROR_CODE
-    cur = conn.cursor()
-
-    try:
-        # Try executing the SQL and get from the database
-        sql = """UPDATE Member
-                 SET homebay=%s
-                 WHERE email=%s"""
-        cur.execute(sql, (bayname, email))
-
-        cur.close()                     # Close the cursor
-        conn.close()                    # Close the connection to the db
-        
-    except:
-        # If there were any errors, return a NULL row printing an error to the debug
-        print("Error with Database")
-    cur.close()                     # Close the cursor
-    conn.close()                    # Close the connection to the db
     return True
 
 #####################################################
