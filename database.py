@@ -48,13 +48,15 @@ def check_login(email, password):
         # Try executing the SQL and get from the database
         sql = """SELECT *
                  FROM Member
-                 WHERE email=%s AND password=%s"""
-        cur.execute(sql, (email, password))
-        r = cur.fetchone()
+                 WHERE (email=%s OR nickname =%s) AND password=%s"""
+        cur.execute(sql, (email, email, password))
+        result = cur.fetchone()
+        if (result is None):
+            return None
 
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
-        return r
+        return result
     except:
         # If there were any errors, return a NULL row printing an error to the debug
         print("Error with Database")
