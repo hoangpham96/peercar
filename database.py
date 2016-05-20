@@ -44,6 +44,7 @@ def check_login(email, password):
     if(conn is None):
         return ERROR_CODE
     cur = conn.cursor()
+
     try:
         # Try executing the SQL and get from the database
         sql = """SELECT *
@@ -60,7 +61,6 @@ def check_login(email, password):
             return result
         else:
             return None
-
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
         
@@ -69,6 +69,8 @@ def check_login(email, password):
         print("Error with Database")
     cur.close()                     # Close the cursor
     conn.close()                    # Close the connection to the db
+
+
 
     # Return the relevant information (watch the order!)
     return None
