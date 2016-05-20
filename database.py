@@ -154,7 +154,6 @@ def get_car_details(regno):
 def get_all_cars():
     val = [ ['66XY99', 'Ice the Cube', 'Nissan', 'Cube', '2007', 'auto'], ['WR3KD', 'Bob the SmartCar', 'Smart', 'Fortwo', '2015', 'auto']]
 
-    # TODO
     # Get all cars that PeerCar has
     # Return the results
     conn = database_connect()
@@ -167,11 +166,16 @@ def get_all_cars():
         sql = """SELECT *
                  FROM Car"""
         cur.execute(sql)
-        result = cur.fetchall()
-        if (result is None):
+        results = cur.fetchall()
+        if (results is None):
             return None
 
-        return result[:-1]
+        filteredResult = []
+
+        for result in results:
+            filteredResult.append(result[:-1])
+
+        return filteredResult
 
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
