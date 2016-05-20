@@ -1,0 +1,3 @@
+ - Deleted salt column from member table (salt for bcrypt is included in password column)
+ - Updated login function in routes.py to correspond to change above
+ - Hashed and salted the example data
