@@ -2,7 +2,7 @@
 
 from modules import pg8000
 import configparser
-
+import bcrypt
 
 # Define some useful variables
 ERROR_CODE = 55929
