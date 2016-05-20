@@ -60,15 +60,15 @@ def login():
 
         # Store the user details for us to use throughout
         user_details['email'] = request.form['email']
-        user_details['nickname'] = val[0]
-        user_details['title'] = val[1]
-        user_details['first'] = val[2]
-        user_details['family'] = val[3]
-        user_details['address'] = val[4]
-        user_details['homebay'] = val[5]
-        user_details['membersince'] = val[6]
-        user_details['plan'] = val[7]
-        user_details['num_bookings'] = val[8]
+        user_details['nickname'] = val[2]
+        user_details['title'] = val[5]
+        user_details['first'] = val[6]
+        user_details['family'] = val[7]
+        user_details['address'] = val[8]
+        user_details['homebay'] = val[13]
+        user_details['membersince'] = val[9]
+        user_details['plan'] = val[14]
+        user_details['num_bookings'] = val[16]
         return redirect(url_for('index'))
 
     elif(request.method == 'GET'):

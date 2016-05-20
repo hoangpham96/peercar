@@ -37,12 +37,32 @@ def database_connect():
 #####################################################
 
 def check_login(email, password):
-    # Dummy data
-    val = ['Shadow', 'Mr', 'Evan', 'Nave', '123 Fake Street, Fakesuburb', 'SIT', '01-05-2016', 'Premium', '1']
-    # TODO
     # Check if the user details are correct!
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT *
+                 FROM Member
+                 WHERE email=%s AND password=%s"""
+        cur.execute(sql, (email, password))
+        r = cur.fetchone()
+
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        return r
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+
     # Return the relevant information (watch the order!)
-    return val
+    return None
 
 
 #####################################################
