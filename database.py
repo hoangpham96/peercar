@@ -95,7 +95,7 @@ def update_homebay(email, bayname):
                  SET homebay=%s
                  WHERE email=%s"""
         cur.execute(sql, (bayname, email))
-        
+
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
         
@@ -157,8 +157,33 @@ def get_all_cars():
     # TODO
     # Get all cars that PeerCar has
     # Return the results
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
 
-    return val
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT *
+                 FROM Car"""
+        cur.execute(sql)
+        result = cur.fetchall()
+        if (result is None):
+            return None
+
+        return result[:-1]
+
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+
+
+    return None
 #####################################################
 ##  Bay (detail, list, finding cars inside bay)
 #####################################################
