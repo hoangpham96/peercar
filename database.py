@@ -105,12 +105,36 @@ def make_booking(email, car_rego, date, hour, duration):
 
 
 def get_all_bookings(email):
-    val = [['66XY99', 'Ice the Cube', '01-05-2016', '10', '4', '29-04-2016'],['66XY99', 'Ice the Cube', '27-04-2016', '16'], ['WR3KD', 'Bob the SmartCar', '01-04-2016', '6']]
 
-    # TODO
     # Get all the bookings made by this member's email
+    result = []
 
-    return val
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        sql = """SELECT car, name, whenbooked::date, EXTRACT(hour FROM whenbooked)
+        FROM Member INNER JOIN Booking ON (memberno = madeby)
+        INNER JOIN Car ON (car = regno)
+        WHERE email=%s"""
+
+        cur.execute(sql, (email,))
+        result = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        if (result is None):
+            return None
+        return result
+    except:
+        print("Error with Database")
+
+    return result
+
+
 
 def get_booking(b_date, b_hour, car):
     val = ['Shadow', '66XY99', 'Ice the Cube', '01-05-2016', '10', '4', '29-04-2016', 'SIT']
