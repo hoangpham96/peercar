@@ -130,8 +130,6 @@ def get_car_details(regno):
     return val
 
 def get_all_cars():
-    val = [ ['66XY99', 'Ice the Cube', 'Nissan', 'Cube', '2007', 'auto'], ['WR3KD', 'Bob the SmartCar', 'Smart', 'Fortwo', '2015', 'auto']]
-
     # Get all cars that PeerCar has
     # Return the results
     conn = database_connect()
