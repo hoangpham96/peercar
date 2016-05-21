@@ -139,24 +139,19 @@ def get_car_details(regno):
     cur = conn.cursor()
 
     try:
+        result = []
         # Try executing the SQL and get from the database
-        sql = """
-                 """
-        cur.execute(sql, (email, email))
+        sql = """SELECT regno, C.name, make, model, year, transmission, category, capacity, CB.name, walkscore, mapurl
+                 FROM (Car C INNER JOIN CarModel CM USING (make, model))
+                             INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
+                 WHERE regno = 'WPQ966' """
+        cur.execute(sql)
         result = cur.fetchone()
         if (result is None):
             return None
 
+        return result
 
-        # Stored hash includes salt and hash of password
-
-        stored_hash = result[3].encode(encoding='ascii')
-        pwd = password.encode(encoding = 'ascii')
-        print(pwd)
-        if (bcrypt.hashpw(pwd, stored_hash) == stored_hash):
-            return result
-        else:
-            return None
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
         
@@ -167,7 +162,7 @@ def get_car_details(regno):
     conn.close()                    # Close the connection to the db
 
 
-    return val
+    return result
 
 def get_all_cars():
     val = [ ['66XY99', 'Ice the Cube', 'Nissan', 'Cube', '2007', 'auto'], ['WR3KD', 'Bob the SmartCar', 'Smart', 'Fortwo', '2015', 'auto']]
