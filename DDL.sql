@@ -42,8 +42,8 @@ $$ LANGUAGE plpgsql;
 
 
 /* Attempt to make booking and return whether successful*/
---SELECT * FROM booking;
-SELECT * FROM make_booking('drfoster', 'BJN71S', '2022-07-01', '5', '12');
+--SELECT * FROM booking WHERE madeby = 1 ORDER BY whenbooked DESC;
+--SELECT * FROM make_booking('drfoster', 'BJN71S', '2022-07-01', '5', '12');
 DROP FUNCTION IF EXISTS make_booking(TEXT, TEXT, TEXT, TEXT, TEXT);
 CREATE OR REPLACE FUNCTION make_booking(raw_email TEXT, 
 					raw_regno TEXT, 
@@ -80,6 +80,10 @@ AS $$
 		booking_duration := TRIM(raw_duration);
 
 		IF(booking_hour < 0 OR booking_hour > 23) THEN
+			RETURN FALSE;
+		END IF;
+
+		IF(booking_duration < 1) THEN
 			RETURN FALSE;
 		END IF;
 

@@ -110,6 +110,7 @@ def make_booking(email, car_rego, date, hour, duration):
                  FROM make_booking(%s, %s, %s, %s, %s)"""
         cur.execute(sql, (email, car_rego, date, hour, duration,))
         val = cur.fetchone()
+        conn.commit()
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
 
