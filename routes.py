@@ -151,9 +151,10 @@ def list_bays():
     elif(request.method == 'POST'):
         # The user is searching for a bay
         val = database.search_bays(request.form['search'])
-        # TODO
-        # Check for nulls / handle what happens if empty?
-        return render_template('bay_list.html', bays=val, session=session)
+        if(val is None):
+            return render_template('bay_list.html', bays=[[]], session=session)
+        else:
+            return render_template('bay_list.html', bays=val, session=session)
 
 #####################################################
 ## HOMEBAY
