@@ -177,6 +177,48 @@ def get_car_details(regno):
     # TODO
     # Get details of the car with this registration number
     # Return the data (NOTE: look at the information, requires more than a simple select. NOTE ALSO: ordering of columns)
+<<<<<<< 9e7d449c3607d2358b590c6cbb50454ef2ed7577
+||||||| merged common ancestors
+    return val
+=======
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """
+                 """
+        cur.execute(sql, (email, email))
+        result = cur.fetchone()
+        if (result is None):
+            return None
+
+
+        # Stored hash includes salt and hash of password
+
+        stored_hash = result[3].encode(encoding='ascii')
+        pwd = password.encode(encoding = 'ascii')
+        print(pwd)
+        if (bcrypt.hashpw(pwd, stored_hash) == stored_hash):
+            return result
+        else:
+            return None
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+
+
+    return val
+>>>>>>> Adding initial code
 
     # Ask for the database connection, and get the cursor set up
     conn = database_connect()
