@@ -163,11 +163,37 @@ def get_bay(name):
     return val
 
 def search_bays(search_term):
-    val = [['SIT', '123 Some Street, Boulevard', '-33.887946', '151.192958']]
+    return [['SIT', '123 Some Street, Boulevard', '-33.887946', '151.192958']]
 
-    # TODO
-    # Select the bays that match (or are similar) to the search term
-    # You may like this
+    #TODO: work out how we should handle nulls for this
+    if (search_term is None):
+        return None
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT *
+                 FROM search_bays('%s')
+                 """
+        cur.execute(sql, search_term)
+        result = cur.fetchone()
+        if (result is None):
+            return None
+
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+
     return val
 
 def get_cars_in_bay(bay_name):
