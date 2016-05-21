@@ -146,12 +146,37 @@ def get_all_cars():
 #####################################################
 
 def get_all_bays():
-    val = [['SIT', '123 Some Street, Boulevard', '2'], ['some_bay', '1 Somewhere Road, Right here', '1']]
-    # TODO
     # Get all the bays that PeerCar has :)
-    # And the number of bays
+    # And the number of cars
     # Return the results
-    return val
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT CB.name, CB.address, count(C.regno) AS count
+                 FROM carbay CB INNER JOIN car C ON (CB.bayid = C.parkedat)
+                 GROUP BY CB.name, CB.address
+                 ORDER BY count DESC, name"""
+        cur.execute(sql)
+        result = cur.fetchall()
+        if (result is None):
+            return None
+
+        return result
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+
 
 def get_bay(name):
     val = ['SIT', 'Home to many (happy?) people.', '123 Some Street, Boulevard', '-33.887946', '151.192958']
