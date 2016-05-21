@@ -177,7 +177,38 @@ def get_car_details(regno):
     # TODO
     # Get details of the car with this registration number
     # Return the data (NOTE: look at the information, requires more than a simple select. NOTE ALSO: ordering of columns)
-    return val
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        result = []
+        # Try executing the SQL and get from the database
+        sql = """SELECT regno, C.name, make, model, year, transmission, category, capacity, CB.name, walkscore, mapurl
+                 FROM (Car C INNER JOIN CarModel CM USING (make, model))
+                             INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
+                 WHERE regno = %s """ 
+        cur.execute(sql, regno)
+        result = cur.fetchone()
+        if (result is None):
+            return None
+
+        return result
+
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+
+
+    return result
 
 def get_all_cars():
     # Get all cars that PeerCar has
@@ -254,12 +285,34 @@ def get_bay(name):
     return val
 
 def search_bays(search_term):
-    val = [['SIT', '123 Some Street, Boulevard', '-33.887946', '151.192958']]
+    #val = [['SIT', '123 Some Street, Boulevard', '-33.887946', '151.192958']]
 
-    # TODO
-    # Select the bays that match (or are similar) to the search term
-    # You may like this
-    return val
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT *
+                 FROM search_bays(%s)"""
+        cur.execute(sql, (search_term,))
+        result = cur.fetchall()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+        if (result is None):
+            return None
+        else:
+            return result
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+    return None
 
 def get_cars_in_bay(bay_name):
     val = [ ['66XY99', 'Ice the Cube'], ['WR3KD', 'Bob the SmartCar']]
