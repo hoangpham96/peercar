@@ -161,7 +161,7 @@ def get_all_bays():
         sql = """SELECT CB.name, CB.address, count(C.regno) AS count
                  FROM carbay CB INNER JOIN car C ON (CB.bayid = C.parkedat)
                  GROUP BY CB.name, CB.address
-                 ORDER BY count DESC, name"""
+                 ORDER BY name ASC"""
         cur.execute(sql)
         result = cur.fetchall()
         if (result is None):
@@ -177,6 +177,12 @@ def get_all_bays():
     cur.close()                     # Close the cursor
     conn.close()                    # Close the connection to the db
 
+
+    # Query to select specific address from location table. Only works to suburb. No street and street number in database.
+    #   SELECT L1.name || ', ' || L2.name || ', ' || L3.name || ', ' || L4.name AS address
+    #   FROM (((location L1 INNER JOIN location L2 ON (L1.is_at=L2.locid)) 
+    #                       INNER JOIN location L3 ON (L2.is_at=L3.locid))
+    #                       INNER JOIN location L4 ON (L3.is_at=L4.locid))
 
 def get_bay(name):
     val = ['SIT', 'Home to many (happy?) people.', '123 Some Street, Boulevard', '-33.887946', '151.192958']
