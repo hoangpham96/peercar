@@ -144,8 +144,8 @@ def get_all_cars():
         sql = """SELECT regno, name, make, model, year, transmission
                  FROM Car"""
         cur.execute(sql)
-        results = cur.fetchall()
-        if (results is None):
+        result = cur.fetchall()
+        if (result is None):
             return None
 
         return result
