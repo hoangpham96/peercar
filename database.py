@@ -186,24 +186,16 @@ def get_cars_in_bay(bay_name):
 
     try:
         # Try executing the SQL and get from the database
-        sql = """SELECT *
-                 FROM Member
-                 WHERE email=%s OR nickname =%s"""
-        cur.execute(sql, (email, email))
-        result = cur.fetchone()
+        sql = """SELECT C.regno, C.name
+                 FROM Car C INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
+                 WHERE CB.name = %s"""
+        cur.execute(sql, bay_name)
+        result = cur.fetchall()
         if (result is None):
             return None
 
+        return result
 
-        # Stored hash includes salt and hash of password
-
-        stored_hash = result[3].encode(encoding='ascii')
-        pwd = password.encode(encoding = 'ascii')
-        print(pwd)
-        if (bcrypt.hashpw(pwd, stored_hash) == stored_hash):
-            return result
-        else:
-            return None
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
         
@@ -212,6 +204,5 @@ def get_cars_in_bay(bay_name):
         print("Error with Database")
     cur.close()                     # Close the cursor
     conn.close()                    # Close the connection to the db
-
     
-    return val
+    return None
