@@ -144,8 +144,8 @@ def get_car_details(regno):
         sql = """SELECT regno, C.name, make, model, year, transmission, category, capacity, CB.name, walkscore, mapurl
                  FROM (Car C INNER JOIN CarModel CM USING (make, model))
                              INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
-                 WHERE regno = 'WPQ966' """
-        cur.execute(sql)
+                 WHERE regno = %s """ 
+        cur.execute(sql, regno)
         result = cur.fetchone()
         if (result is None):
             return None
