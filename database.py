@@ -117,9 +117,9 @@ def get_all_bookings(email):
 
     try:
         sql = """SELECT car, name, whenbooked::date, EXTRACT(hour FROM whenbooked)
-        FROM Member INNER JOIN Booking ON (memberno = madeby)
-        INNER JOIN Car ON (car = regno)
-        WHERE email=%s"""
+                 FROM Member INNER JOIN Booking ON (memberno = madeby)
+                 INNER JOIN Car ON (car = regno)
+                 WHERE email=%s"""
 
         cur.execute(sql, (email,))
         result = cur.fetchall()
@@ -131,8 +131,10 @@ def get_all_bookings(email):
         return result
     except:
         print("Error with Database")
+        cur.close()
+        conn.close()
 
-    return result
+    return None
 
 
 
