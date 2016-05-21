@@ -180,13 +180,36 @@ def get_car_details(regno):
     return val
 
 def get_all_cars():
-    val = [ ['66XY99', 'Ice the Cube', 'Nissan', 'Cube', '2007', 'auto'], ['WR3KD', 'Bob the SmartCar', 'Smart', 'Fortwo', '2015', 'auto']]
-
-    # TODO
     # Get all cars that PeerCar has
     # Return the results
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
 
-    return val
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT regno, name, make, model, year, transmission
+                 FROM Car
+                 ORDER BY name ASC"""
+        cur.execute(sql)
+        result = cur.fetchall()
+        if (result is None):
+            return None
+
+        return result
+
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+
+
+    return None
 #####################################################
 ##  Bay (detail, list, finding cars inside bay)
 #####################################################
