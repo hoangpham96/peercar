@@ -1,5 +1,5 @@
 ﻿/*set carsharing as the default schema*/
-SET search_path TO carsharing
+SET search_path TO carsharing;
 
 SELECT * FROM carbay
 ALTER TABLE member ALTER password SET DATA TYPE CHAR(60)
