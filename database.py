@@ -119,7 +119,8 @@ def get_all_bookings(email):
         sql = """SELECT car, name, whenbooked::date, EXTRACT(hour FROM whenbooked)
         FROM Member INNER JOIN Booking ON (memberno = madeby)
         INNER JOIN Car ON (car = regno)
-        WHERE email=%s"""
+        WHERE email=%s
+        ORDER BY whenbooked::date"""
 
         cur.execute(sql, (email,))
         result = cur.fetchall()
@@ -137,13 +138,41 @@ def get_all_bookings(email):
 
 
 def get_booking(b_date, b_hour, car):
-    val = ['Shadow', '66XY99', 'Ice the Cube', '01-05-2016', '10', '4', '29-04-2016', 'SIT']
 
-    # TODO
     # Get the information about a certain booking
     # It has to have the combination of date, hour and car
 
-    return val
+    result = []
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
+        EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
+        FROM member INNER JOIN booking ON (madeby = memberno)
+        INNER JOIN car ON (car = regno)
+        INNER JOIN carbay ON (parkedat = bayid)
+        WHERE whenbooked::date = %s
+        AND EXTRACT(hour from whenbooked) = %s
+        AND car = %s"""
+
+        cur.execute(sql, (b_date, b_hour, car))
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if (result is None):
+            return None
+        return result
+
+    except:
+        print("Error with Database")
+
+    return result
 
 
 #####################################################
@@ -175,7 +204,34 @@ def get_all_bays():
     # Get all the bays that PeerCar has :)
     # And the number of bays
     # Return the results
-    return val
+
+    result = []
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        sql = """SELECT CB.name, CB.address, count(C.regno) AS count
+        FROM carbay CB INNER JOIN car C ON (CB.bayid = C.parkedat)
+        GROUP BY CB.name, CB.address
+        ORDER BY name ASC"""
+
+        cur.execute(sql)
+        result = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        if (result is None):
+            return None
+        return result
+
+    except:
+        print("Error with Database")
+
+    return result
 
 def get_bay(name):
     val = ['SIT', 'Home to many (happy?) people.', '123 Some Street, Boulevard', '-33.887946', '151.192958']
