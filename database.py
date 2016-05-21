@@ -112,10 +112,10 @@ def get_all_bookings(email):
         sql = """SELECT car, name, whenbooked::date, EXTRACT(hour FROM whenbooked)
                  FROM Member INNER JOIN Booking ON (memberno = madeby)
                  INNER JOIN Car ON (car = regno)
-                 WHERE email=%s
+                 WHERE email=%s OR nickname =%s
                  ORDER BY whenbooked::date"""
 
-        cur.execute(sql, (email,))
+        cur.execute(sql, (email,email))
         result = cur.fetchall()
         cur.close()
         conn.close()
