@@ -117,10 +117,10 @@ def get_all_bookings(email):
 
     try:
         sql = """SELECT car, name, whenbooked::date, EXTRACT(hour FROM whenbooked)
-        FROM Member INNER JOIN Booking ON (memberno = madeby)
-        INNER JOIN Car ON (car = regno)
-        WHERE email=%s
-        ORDER BY whenbooked::date"""
+                 FROM Member INNER JOIN Booking ON (memberno = madeby)
+                             INNER JOIN Car ON (car = regno)
+                 WHERE email=%s
+                 ORDER BY whenbooked::date"""
 
         cur.execute(sql, (email,))
         result = cur.fetchall()
@@ -130,8 +130,11 @@ def get_all_bookings(email):
         if (result is None):
             return None
         return result
+
     except:
         print("Error with Database")
+        cur.close()
+        conn.close()
 
     return result
 
@@ -152,13 +155,13 @@ def get_booking(b_date, b_hour, car):
 
     try:
         sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
-        EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
-        FROM member INNER JOIN booking ON (madeby = memberno)
-        INNER JOIN car ON (car = regno)
-        INNER JOIN carbay ON (parkedat = bayid)
-        WHERE whenbooked::date = %s
-        AND EXTRACT(hour from whenbooked) = %s
-        AND car = %s"""
+                        EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
+                 FROM member INNER JOIN booking ON (madeby = memberno)
+                             INNER JOIN car ON (car = regno)
+                             INNER JOIN carbay ON (parkedat = bayid)
+                 WHERE whenbooked::date = %s
+                    AND EXTRACT(hour from whenbooked) = %s
+                    AND car = %s"""
 
         cur.execute(sql, (b_date, b_hour, car))
         result = cur.fetchone()
@@ -171,6 +174,8 @@ def get_booking(b_date, b_hour, car):
 
     except:
         print("Error with Database")
+        cur.close()
+        conn.close()
 
     return result
 
@@ -215,9 +220,9 @@ def get_all_bays():
 
     try:
         sql = """SELECT CB.name, CB.address, count(C.regno) AS count
-        FROM carbay CB INNER JOIN car C ON (CB.bayid = C.parkedat)
-        GROUP BY CB.name, CB.address
-        ORDER BY name ASC"""
+                 FROM carbay CB INNER JOIN car C ON (CB.bayid = C.parkedat)
+                 GROUP BY CB.name, CB.address
+                 ORDER BY name ASC"""
 
         cur.execute(sql)
         result = cur.fetchall()
@@ -230,6 +235,8 @@ def get_all_bays():
 
     except:
         print("Error with Database")
+        cur.close()
+        conn.close()
 
     return result
 
