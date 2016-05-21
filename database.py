@@ -15,7 +15,6 @@ def database_connect():
     # Read the config file
     config = configparser.ConfigParser()
     config.read('config.ini')
-
     # Create a connection to the database
     connection = None
     try:
@@ -32,51 +31,47 @@ def database_connect():
     #return the connection to use
     return connection
 
+
 #####################################################
 ##  Login
 #####################################################
 
 def check_login(email, password):
+
     # Check if the user details are correct!
 
-    # Ask for the database connection, and get the cursor set up
     conn = database_connect()
     if(conn is None):
         return ERROR_CODE
     cur = conn.cursor()
 
     try:
-        # Try executing the SQL and get from the database
         sql = """SELECT *
                  FROM Member
                  WHERE email=%s OR nickname =%s"""
         cur.execute(sql, (email, email))
         result = cur.fetchone()
+        cur.close()
+        conn.close()
+
         if (result is None):
             return None
 
-
         # Stored hash includes salt and hash of password
-
         stored_hash = result[3].encode(encoding='ascii')
         pwd = password.encode(encoding = 'ascii')
-        print(pwd)
+
         if (bcrypt.hashpw(pwd, stored_hash) == stored_hash):
             return result
         else:
             return None
-        cur.close()                     # Close the cursor
-        conn.close()                    # Close the connection to the db
         
     except:
-        # If there were any errors, return a NULL row printing an error to the debug
         print("Error with Database")
-    cur.close()                     # Close the cursor
-    conn.close()                    # Close the connection to the db
 
+    cur.close()
+    conn.close()
 
-
-    # Return the relevant information (watch the order!)
     return None
 
 
@@ -107,9 +102,7 @@ def make_booking(email, car_rego, date, hour, duration):
 def get_all_bookings(email):
 
     # Get all the bookings made by this member's email
-    result = []
 
-    # Ask for the database connection, and get the cursor set up
     conn = database_connect()
     if(conn is None):
         return ERROR_CODE
@@ -118,7 +111,7 @@ def get_all_bookings(email):
     try:
         sql = """SELECT car, name, whenbooked::date, EXTRACT(hour FROM whenbooked)
                  FROM Member INNER JOIN Booking ON (memberno = madeby)
-                             INNER JOIN Car ON (car = regno)
+                 INNER JOIN Car ON (car = regno)
                  WHERE email=%s
                  ORDER BY whenbooked::date"""
 
@@ -127,16 +120,15 @@ def get_all_bookings(email):
         cur.close()
         conn.close()
 
-        if (result is None):
-            return None
         return result
 
     except:
         print("Error with Database")
-        cur.close()
-        conn.close()
 
-    return result
+    cur.close()
+    conn.close()
+
+    return None
 
 
 
@@ -145,9 +137,6 @@ def get_booking(b_date, b_hour, car):
     # Get the information about a certain booking
     # It has to have the combination of date, hour and car
 
-    result = []
-
-    # Ask for the database connection, and get the cursor set up
     conn = database_connect()
     if(conn is None):
         return ERROR_CODE
@@ -155,29 +144,28 @@ def get_booking(b_date, b_hour, car):
 
     try:
         sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
-                        EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
+                 EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
                  FROM member INNER JOIN booking ON (madeby = memberno)
-                             INNER JOIN car ON (car = regno)
-                             INNER JOIN carbay ON (parkedat = bayid)
+                 INNER JOIN car ON (car = regno)
+                 INNER JOIN carbay ON (parkedat = bayid)
                  WHERE whenbooked::date = %s
-                    AND EXTRACT(hour from whenbooked) = %s
-                    AND car = %s"""
+                 AND EXTRACT(hour from whenbooked) = %s
+                 AND car = %s"""
 
         cur.execute(sql, (b_date, b_hour, car))
         result = cur.fetchone()
         cur.close()
         conn.close()
 
-        if (result is None):
-            return None
         return result
 
     except:
         print("Error with Database")
-        cur.close()
-        conn.close()
 
-    return result
+    cur.close()
+    conn.close()
+
+    return None
 
 
 #####################################################
@@ -204,15 +192,11 @@ def get_all_cars():
 #####################################################
 
 def get_all_bays():
-    val = [['SIT', '123 Some Street, Boulevard', '2'], ['some_bay', '1 Somewhere Road, Right here', '1']]
-    # TODO
+
     # Get all the bays that PeerCar has :)
     # And the number of bays
     # Return the results
 
-    result = []
-
-    # Ask for the database connection, and get the cursor set up
     conn = database_connect()
     if(conn is None):
         return ERROR_CODE
@@ -229,16 +213,13 @@ def get_all_bays():
         cur.close()
         conn.close()
 
-        if (result is None):
-            return None
         return result
 
     except:
         print("Error with Database")
-        cur.close()
-        conn.close()
 
-    return result
+    return None
+
 
 def get_bay(name):
     val = ['SIT', 'Home to many (happy?) people.', '123 Some Street, Boulevard', '-33.887946', '151.192958']
