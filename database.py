@@ -141,19 +141,14 @@ def get_all_cars():
 
     try:
         # Try executing the SQL and get from the database
-        sql = """SELECT *
+        sql = """SELECT regno, name, make, model, year, transmission
                  FROM Car"""
         cur.execute(sql)
         results = cur.fetchall()
         if (results is None):
             return None
 
-        filteredResult = []
-
-        for result in results:
-            filteredResult.append(result[:-1])
-
-        return filteredResult
+        return result
 
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
