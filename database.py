@@ -88,6 +88,7 @@ def update_homebay(email, bayname):
 #####################################################
 
 def make_booking(email, car_rego, date, hour, duration):
+    print('%s, %s, %s, %s, %s' % (email, car_rego, date, hour, duration))
     # TODO
     # Insert a new booking
     # Make sure to check for:
@@ -97,7 +98,7 @@ def make_booking(email, car_rego, date, hour, duration):
     # return False if booking was unsuccessful :)
     # We want to make sure we check this thoroughly
 
-    # Ask for the database connection, and get the cursor set up
+    # #Ask for the database connection, and get the cursor set up
     conn = database_connect()
     if(conn is None):
         return ERROR_CODE
@@ -105,32 +106,23 @@ def make_booking(email, car_rego, date, hour, duration):
 
     try:
         # Try executing the SQL and get from the database
-        # Get memberno
-        sql = """SELECT memberno
-                 FROM member
-                 WHERE email = %s"""
-        cur.execute(sql, email)
-        memberno = cur.fetchone()
-        
-        # Try executing the SQL and get from the database
-
-        sql = """
-                 """
-        cur.execute(sql)
-
-
+        sql = """SELECT *
+                 FROM make_booking(%s, %s, %s, %s, %s)"""
+        cur.execute(sql, (email, car_rego, date, hour, duration,))
+        val = cur.fetchone()
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
-        
+
+        if(val is None or len(val) < 1):
+            return False
+        else:
+            return val[0]
     except:
-        # If there were any errors, return a NULL row printing an error to the debug
+        # If there were any errors return false
         print("Error with Database")
-    cur.close()                     # Close the cursor
-    conn.close()                    # Close the connection to the db
-
-
-    
-    return True
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        return False
 
 
 def get_all_bookings(email):
