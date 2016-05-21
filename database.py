@@ -282,7 +282,32 @@ def get_bay(name):
     # Get the information about the bay with this unique name
     # Make sure you're checking ordering ;)
 
-    return val
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT name, description, address, gps_long, gps_lat
+                 FROM carbay 
+                 WHERE name = %s"""
+        cur.execute(sql, name)
+        result = cur.fetchone()
+        if (result is None):
+            return None
+
+        return result
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+
 
 def search_bays(search_term):
     #val = [['SIT', '123 Some Street, Boulevard', '-33.887946', '151.192958']]
