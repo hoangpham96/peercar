@@ -1,23 +1,17 @@
-<<<<<<< HEAD
+﻿
 ﻿/*set carsharing as the default schema*/
 SET search_path TO carsharing;
 
-SELECT * FROM carbay
-ALTER TABLE member ALTER password SET DATA TYPE CHAR(60)
-UPDATE member SET password ='$2b$12$e/BZXwFoEg9dHSlJ9uDQ..iexa5UWBXHnCXgEsqMIOGf01pmsSIju' WHERE memberno=1
-ALTER TABLE member DROP COLUMN pw_salt0
-=======
-﻿SET search_path TO carsharing;
 ALTER TABLE member ALTER password SET DATA TYPE CHAR(60);
 ALTER TABLE member DROP COLUMN pw_salt;
->>>>>>> refs/remotes/origin/master
+
 
 --------------------------------------
 -- PROCEDURES --
 --------------------------------------
 
 /* Return bays matching a search term*/
-SELECT * FROM search_bays('point');
+--SELECT * FROM search_bays('point');
 DROP FUNCTION IF EXISTS search_bays(search_term TEXT);
 CREATE OR REPLACE FUNCTION search_bays(search_term TEXT)
 	RETURNS TABLE(name_result carbay.name%TYPE, address_result carbay.address%TYPE, count_result INTEGER)
@@ -89,6 +83,7 @@ AS $$
 			RETURN FALSE;
 		END IF;
 
+		-- Unsure about this
 		IF(booking_duration < 1) THEN
 			RETURN FALSE;
 		END IF;
