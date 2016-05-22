@@ -6,7 +6,7 @@ ALTER TABLE member ALTER pw_salt SET DATA TYPE CHAR(29);
 --------------------------------------
 
 /* Return bays matching a search term*/
---SELECT * FROM search_bays('point');
+SELECT * FROM search_bays('point');
 DROP FUNCTION IF EXISTS search_bays(search_term TEXT);
 CREATE OR REPLACE FUNCTION search_bays(search_term TEXT)
 	RETURNS TABLE(name_result carbay.name%TYPE, address_result carbay.address%TYPE, count_result INTEGER)
@@ -37,9 +37,8 @@ $$ LANGUAGE plpgsql;
 
 /* Return bays matching a search term*/
 --SELECT * FROM member;
-SELECT * FROM get_hash_and_salt('drfoster');
-DROP FUNCTION IF EXISTS get_hash_and_salt(TEXT);
-CREATE OR REPLACE FUNCTION get_hash_and_salt(raw_email TEXT)
+DROP FUNCTION IF EXISTS get_hash&salt(TEXT);
+CREATE OR REPLACE FUNCTION get_hash&salt(raw_email TEXT)
 	RETURNS TABLE(hash_result member.password%TYPE, salt_result member.pw_salt%TYPE)
 AS $$
 	BEGIN
