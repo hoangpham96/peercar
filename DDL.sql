@@ -41,6 +41,25 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 
+
+
+/* Returns a list of bookings a user has made using given email*/
+DROP FUNCTION IF EXISTS get_all_bookings(member_email TEXT);
+CREATE OR REPLACE FUNCTION get_all_bookings(member_email TEXT)
+	RETURNS TABLE(regno_result Booking.car%TYPE, carName_result Car.name%TYPE, starttimeDate_result DATE, starttimeHour_result INTEGER, duration_result INTEGER, whenBookedDate_result DATE)
+AS $$
+	BEGIN
+		RETURN QUERY
+			SELECT car, name, starttime::date, CAST(EXTRACT(hour FROM starttime) AS INT), CAST(EXTRACT(epoch FROM endtime-starttime)/3600 AS INT), whenbooked::date
+			FROM Member INNER JOIN Booking ON (memberno = madeby)
+			INNER JOIN Car ON (car = regno)
+			WHERE email = member_email OR nickname = member_email
+			ORDER BY starttime::date DESC;
+	END;
+$$ LANGUAGE plpgsql;
+
+
+
 /* Attempt to make booking and return whether successful*/
 --SELECT * FROM booking WHERE madeby = 1 ORDER BY whenbooked DESC;
 --SELECT * FROM make_booking('drfoster', 'BJN71S', '2022-07-01', '5', '12');

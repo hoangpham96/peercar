@@ -137,13 +137,8 @@ def get_all_bookings(email):
     cur = conn.cursor()
 
     try:
-        sql = """SELECT car, name, whenbooked::date, CAST(EXTRACT(hour FROM whenbooked) AS INT)
-                 FROM Member INNER JOIN Booking ON (memberno = madeby)
-                 INNER JOIN Car ON (car = regno)
-                 WHERE email=%s OR nickname =%s
-                 ORDER BY whenbooked::date DESC"""
-
-        cur.execute(sql, (email,email))
+        sql = """SELECT * FROM get_all_bookings(%s)"""
+        cur.execute(sql, (email,))
         result = cur.fetchall()
         cur.close()
         conn.close()
