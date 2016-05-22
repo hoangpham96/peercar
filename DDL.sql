@@ -35,3 +35,20 @@ AS $$
 		END IF;
 	END;
 $$ LANGUAGE plpgsql;
+
+
+/* Return bookings based on member's email*/
+SELECT * FROM get_all_bookings('point');
+DROP FUNCTION IF EXISTS get_all_bookings(email TEXT);
+CREATE OR REPLACE FUNCTION get_all_bookings(member_email TEXT)
+	RETURNS TABLE(regno_result Booking.car%TYPE, carName_result Car.name%TYPE, whenBookedDate_result DATE, whenBookedHour INTEGER)
+AS $$
+	BEGIN
+		RETURN QUERY
+			SELECT car, name, whenbooked::date, CAST(EXTRACT(hour FROM whenbooked) AS INT)
+			FROM Member INNER JOIN Booking ON (memberno = madeby)
+			INNER JOIN Car ON (car = regno)
+			WHERE email = member_email OR nickname = member_email
+			ORDER BY whenbooked::date DESC;
+	END;
+$$ LANGUAGE plpgsql;
