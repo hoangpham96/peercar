@@ -1,4 +1,3 @@
-﻿
 ﻿/*set carsharing as the default schema*/
 SET search_path TO carsharing;
 
