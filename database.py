@@ -338,9 +338,7 @@ def search_bays(search_term):
     return None
 
 def get_cars_in_bay(bay_name):
-    val = [ ['66XY99', 'Ice the Cube'], ['WR3KD', 'Bob the SmartCar']]
 
-    # TODO
     # Get the cars inside the bay with the bay name
     # Cars who have this bay as their bay :)
     # Return simple details (only regno and name)
@@ -356,7 +354,7 @@ def get_cars_in_bay(bay_name):
         sql = """SELECT C.regno, C.name
                  FROM Car C INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
                  WHERE CB.name = %s"""
-        cur.execute(sql, bay_name)
+        cur.execute(sql, (bay_name,))
         result = cur.fetchall()
         if (result is None):
             return None
