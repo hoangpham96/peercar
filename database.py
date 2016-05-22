@@ -173,10 +173,7 @@ def get_booking(b_date, b_hour, car):
 #####################################################
 
 def get_car_details(regno):
-    val = ['66XY99', 'Ice the Cube','Nissan', 'Cube', '2007', 'auto', 'Luxury', '5', 'SIT', '8', 'http://example.com']
-    # TODO
     # Get details of the car with this registration number
-
     # Ask for the database connection, and get the cursor set up
     conn = database_connect()
     if(conn is None):
@@ -190,7 +187,7 @@ def get_car_details(regno):
                  FROM (Car C INNER JOIN CarModel CM USING (make, model))
                              INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
                  WHERE regno = %s """ 
-        cur.execute(sql, regno)
+        cur.execute(sql, (regno,))
         result = cur.fetchone()
         if (result is None):
             return None
@@ -207,7 +204,7 @@ def get_car_details(regno):
     conn.close()                    # Close the connection to the db
 
 
-    return result
+    return None
 
 def get_all_cars():
     # Get all cars that PeerCar has
