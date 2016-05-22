@@ -143,11 +143,11 @@ def get_booking(b_date, b_hour, car):
     cur = conn.cursor()
 
     try:
-        sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
-                 EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
-                 FROM member INNER JOIN booking ON (madeby = memberno)
-                 INNER JOIN car ON (car = regno)
-                 INNER JOIN carbay ON (parkedat = bayid)
+        sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM starttime),
+                 EXTRACT(hour FROM endtime-starttime), whenbooked::date, carbay.name
+                 FROM ((member INNER JOIN booking ON (madeby = memberno))
+                               INNER JOIN car ON (car = regno))
+                               INNER JOIN carbay ON (parkedat = bayid)
                  WHERE whenbooked::date = %s
                  AND EXTRACT(hour from whenbooked) = %s
                  AND car = %s"""
