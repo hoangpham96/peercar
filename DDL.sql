@@ -1,5 +1,7 @@
-﻿ALTER TABLE member ALTER password SET DATA TYPE CHAR(31);
-ALTER TABLE member ALTER pw_salt SET DATA TYPE CHAR(29);
+﻿SELECT * FROM carbay;
+ALTER TABLE member ALTER password SET DATA TYPE CHAR(60)
+UPDATE member SET password ='$2b$12$e/BZXwFoEg9dHSlJ9uDQ..iexa5UWBXHnCXgEsqMIOGf01pmsSIju' WHERE memberno=1
+ALTER TABLE member DROP COLUMN pw_salt0
 
 --------------------------------------
 -- PROCEDURES --
@@ -32,25 +34,5 @@ AS $$
 						OR cb.address ILIKE '%'|| search_term ||'%'
 					GROUP BY bayid;
 		END IF;
-	END;
-$$ LANGUAGE plpgsql;
-
-/* Return bays matching a search term*/
---SELECT * FROM member;
-DROP FUNCTION IF EXISTS get_hash&salt(TEXT);
-CREATE OR REPLACE FUNCTION get_hash&salt(raw_email TEXT)
-	RETURNS TABLE(hash_result member.password%TYPE, salt_result member.pw_salt%TYPE)
-AS $$
-	BEGIN
-		
-		IF(raw_email IS NOT NULL) THEN
-			raw_email := TRIM(raw_email);
-		END IF;
-
-		RETURN QUERY SELECT m.password, m.pw_salt
-		FROM member m
-		WHERE m.email = raw_email
-			OR m.nickname = raw_email;
-		
 	END;
 $$ LANGUAGE plpgsql;

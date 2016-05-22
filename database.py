@@ -68,9 +68,11 @@ def check_login(email, password):
         
     except:
         print("Error with Database")
-        cur.close()
-        conn.close()
-        return None
+
+    cur.close()
+    conn.close()
+
+    return None
 
 
 #####################################################
