@@ -148,41 +148,40 @@ def get_all_bookings(email):
     return None
 
 
-
 def get_booking(b_date, b_hour, car):
-
-    # Get the information about a certain booking
-    # It has to have the combination of date, hour and car
-
-    conn = database_connect()
-    if(conn is None):
-        return ERROR_CODE
-    cur = conn.cursor()
-
-    try:
-        sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
-                 EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
-                 FROM member INNER JOIN booking ON (madeby = memberno)
-                 INNER JOIN car ON (car = regno)
-                 INNER JOIN carbay ON (parkedat = bayid)
-                 WHERE whenbooked::date = %s
-                 AND EXTRACT(hour from whenbooked) = %s
-                 AND car = %s"""
-
-        cur.execute(sql, (b_date, b_hour, car))
-        result = cur.fetchone()
-        cur.close()
-        conn.close()
-
-        return result
-
-    except:
-        print("Error with Database")
-
-    cur.close()
-    conn.close()
-
-    return None
+ 
+     # Get the information about a certain booking
+     # It has to have the combination of date, hour and car
+ 
+     conn = database_connect()
+     if(conn is None):
+         return ERROR_CODE
+     cur = conn.cursor()
+ 
+     try:
+         sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
+                  EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
+                  FROM member INNER JOIN booking ON (madeby = memberno)
+                  INNER JOIN car ON (car = regno)
+                  INNER JOIN carbay ON (parkedat = bayid)
+                  WHERE whenbooked::date = %s
+                  AND EXTRACT(hour from whenbooked) = %s
+                  AND car = %s"""
+ 
+         cur.execute(sql, (b_date, b_hour, car))
+         result = cur.fetchone()
+         cur.close()
+         conn.close()
+ 
+         return result
+ 
+     except:
+         print("Error with Database")
+ 
+     cur.close()
+     conn.close()
+ 
+     return None
 
 
 #####################################################
@@ -458,4 +457,3 @@ def get_bayname(bayid):
         conn.close()                    # Close the connection to the db
     
         return None
-
