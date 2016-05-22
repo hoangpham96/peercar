@@ -109,7 +109,7 @@ def get_all_bookings(email):
     cur = conn.cursor()
 
     try:
-        sql = """SELECT car, name, whenbooked::date, EXTRACT(hour FROM whenbooked)
+        sql = """SELECT car, name, whenbooked::date, CAST(EXTRACT(hour FROM whenbooked) AS INT)
                  FROM Member INNER JOIN Booking ON (memberno = madeby)
                  INNER JOIN Car ON (car = regno)
                  WHERE email=%s OR nickname =%s
