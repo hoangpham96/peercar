@@ -176,7 +176,6 @@ def get_car_details(regno):
     val = ['66XY99', 'Ice the Cube','Nissan', 'Cube', '2007', 'auto', 'Luxury', '5', 'SIT', '8', 'http://example.com']
     # TODO
     # Get details of the car with this registration number
-    # Return the data (NOTE: look at the information, requires more than a simple select. NOTE ALSO: ordering of columns) 
 
     # Ask for the database connection, and get the cursor set up
     conn = database_connect()
