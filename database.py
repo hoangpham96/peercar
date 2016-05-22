@@ -338,11 +338,36 @@ def search_bays(search_term):
     return None
 
 def get_cars_in_bay(bay_name):
-    val = [ ['66XY99', 'Ice the Cube'], ['WR3KD', 'Bob the SmartCar']]
 
-    # TODO
     # Get the cars inside the bay with the bay name
     # Cars who have this bay as their bay :)
     # Return simple details (only regno and name)
 
-    return val
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT C.regno, C.name
+                 FROM Car C INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
+                 WHERE CB.name = %s"""
+        cur.execute(sql, (bay_name,))
+        result = cur.fetchall()
+        if (result is None):
+            return None
+
+        return result
+
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+    
+    return None
