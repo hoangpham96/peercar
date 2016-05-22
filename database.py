@@ -88,7 +88,6 @@ def update_homebay(email, bayname):
 #####################################################
 
 def make_booking(email, car_rego, date, hour, duration):
-    print('%s, %s, %s, %s, %s' % (email, car_rego, date, hour, duration))
     # TODO
     # Insert a new booking
     # Make sure to check for:
@@ -97,34 +96,7 @@ def make_booking(email, car_rego, date, hour, duration):
     #       - Etc.
     # return False if booking was unsuccessful :)
     # We want to make sure we check this thoroughly
-
-    # #Ask for the database connection, and get the cursor set up
-    conn = database_connect()
-    if(conn is None):
-        return ERROR_CODE
-    cur = conn.cursor()
-
-    try:
-        # Try executing the SQL and get from the database
-        sql = """SELECT *
-                 FROM make_booking(%s, %s, %s, %s, %s)"""
-        cur.execute(sql, (email, car_rego, date, hour, duration,))
-        val = cur.fetchone()
-        conn.commit()
-        cur.close()                     # Close the cursor
-        conn.close()                    # Close the connection to the db
-
-        if(val is None or len(val) < 1):
-            return False
-        else:
-            return val[0]
-    except:
-        # If there were any errors return false
-        print("Error with Database")
-        conn.rollback()
-        cur.close()                     # Close the cursor
-        conn.close()                    # Close the connection to the db
-        return False
+    return True
 
 
 def get_all_bookings(email):
@@ -137,8 +109,13 @@ def get_all_bookings(email):
     cur = conn.cursor()
 
     try:
-        sql = """SELECT * FROM get_all_bookings(%s)"""
-        cur.execute(sql, (email,))
+        sql = """SELECT car, name, whenbooked::date, CAST(EXTRACT(hour FROM whenbooked) AS INT)
+                 FROM Member INNER JOIN Booking ON (memberno = madeby)
+                 INNER JOIN Car ON (car = regno)
+                 WHERE email=%s OR nickname =%s
+                 ORDER BY whenbooked::date DESC"""
+
+        cur.execute(sql, (email,email))
         result = cur.fetchall()
         cur.close()
         conn.close()
@@ -166,11 +143,11 @@ def get_booking(b_date, b_hour, car):
     cur = conn.cursor()
 
     try:
-        sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
-                 EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
-                 FROM member INNER JOIN booking ON (madeby = memberno)
-                 INNER JOIN car ON (car = regno)
-                 INNER JOIN carbay ON (parkedat = bayid)
+        sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM starttime),
+                 EXTRACT(hour FROM endtime-starttime), whenbooked::date, carbay.name
+                 FROM ((member INNER JOIN booking ON (madeby = memberno))
+                               INNER JOIN car ON (car = regno))
+                               INNER JOIN carbay ON (parkedat = bayid)
                  WHERE whenbooked::date = %s
                  AND EXTRACT(hour from whenbooked) = %s
                  AND car = %s"""
@@ -394,40 +371,3 @@ def get_cars_in_bay(bay_name):
     conn.close()                    # Close the connection to the db
     
     return None
-
-#################
-# ADDED METHODS #
-#################
-
-def get_num_bookings(email):
-
-    # Ask for the database connection, and get the cursor set up
-    conn = database_connect()
-    if(conn is None):
-        return ERROR_CODE
-    cur = conn.cursor()
-
-    try:
-        # Try executing the SQL and get from the database
-        sql = """SELECT * 
-                    FROM get_num_bookings(%s)"""
-        cur.execute(sql, (email,))
-        result = cur.fetchone()
-
-        conn.commit()
-        cur.close()                     # Close the cursor
-        conn.close()                    # Close the connection to the db
-        
-
-        if (result is None):
-            return None
-
-        return result
-        
-    except:
-        print("Error with Database")
-        cur.close()                     # Close the cursor
-        conn.close()                    # Close the connection to the db
-    
-        return None
-
