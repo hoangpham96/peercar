@@ -84,9 +84,9 @@ AS $$
 		END IF;
 
 		-- Unsure about this
-		IF(booking_duration < 1) THEN
+		/*IF(booking_duration < 1) THEN
 			RETURN FALSE;
-		END IF;
+		END IF;*/
 
 		--look up memberno associated with the email/nick
 		SELECT m.memberno
@@ -120,11 +120,35 @@ AS $$
 		-- Insert the booking
 		INSERT INTO booking(car, madeby, whenbooked, starttime, endtime) 
 			VALUES (booking_car, booking_memberno, LOCALTIMESTAMP , booking_starttime, booking_endtime);
+		UPDATE member SET stat_nrofbookings = stat_nrofbookings + 1 WHERE memberno = booking_memberno;
+		
 		
 		RETURN TRUE;
 
 	EXCEPTION
 		-- return false if there is an exception
 		WHEN OTHERS THEN RETURN FALSE;	
+	END;
+$$ LANGUAGE plpgsql;
+
+/* Get number of bookins stat of user */
+DROP FUNCTION IF EXISTS get_num_bookings(raw_email TEXT);
+CREATE OR REPLACE FUNCTION get_num_bookings(raw_email TEXT)
+	RETURNS INTEGER
+AS $$
+	DECLARE
+		return_value INTEGER;
+	BEGIN
+
+		SELECT stat_nrofbookings
+		INTO return_value
+		FROM member
+		WHERE email = TRIM(raw_email) 
+			OR m.nickname = TRIM(raw_email);
+		
+		RETURN reutrn_value;	
+
+	EXCEPTION
+		WHEN OTHERS THEN RETURN NULL;
 	END;
 $$ LANGUAGE plpgsql;
