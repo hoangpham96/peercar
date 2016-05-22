@@ -88,6 +88,7 @@ def update_homebay(email, bayname):
 #####################################################
 
 def make_booking(email, car_rego, date, hour, duration):
+    print('%s, %s, %s, %s, %s' % (email, car_rego, date, hour, duration))
     # TODO
     # Insert a new booking
     # Make sure to check for:
@@ -96,7 +97,34 @@ def make_booking(email, car_rego, date, hour, duration):
     #       - Etc.
     # return False if booking was unsuccessful :)
     # We want to make sure we check this thoroughly
-    return True
+
+    # #Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT *
+                 FROM make_booking(%s, %s, %s, %s, %s)"""
+        cur.execute(sql, (email, car_rego, date, hour, duration,))
+        val = cur.fetchone()
+        conn.commit()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+
+        if(val is None or len(val) < 1):
+            return False
+        else:
+            return val[0]
+    except:
+        # If there were any errors return false
+        print("Error with Database")
+        conn.rollback()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        return False
 
 
 def get_all_bookings(email):
@@ -109,13 +137,8 @@ def get_all_bookings(email):
     cur = conn.cursor()
 
     try:
-        sql = """SELECT car, name, whenbooked::date, EXTRACT(hour FROM whenbooked)
-                 FROM Member INNER JOIN Booking ON (memberno = madeby)
-                 INNER JOIN Car ON (car = regno)
-                 WHERE email=%s OR nickname =%s
-                 ORDER BY whenbooked::date"""
-
-        cur.execute(sql, (email,email))
+        sql = """SELECT * FROM get_all_bookings(%s)"""
+        cur.execute(sql, (email,))
         result = cur.fetchall()
         cur.close()
         conn.close()
@@ -173,11 +196,7 @@ def get_booking(b_date, b_hour, car):
 #####################################################
 
 def get_car_details(regno):
-    val = ['66XY99', 'Ice the Cube','Nissan', 'Cube', '2007', 'auto', 'Luxury', '5', 'SIT', '8', 'http://example.com']
-    # TODO
     # Get details of the car with this registration number
-    # Return the data (NOTE: look at the information, requires more than a simple select. NOTE ALSO: ordering of columns)
-
     # Ask for the database connection, and get the cursor set up
     conn = database_connect()
     if(conn is None):
@@ -191,7 +210,7 @@ def get_car_details(regno):
                  FROM (Car C INNER JOIN CarModel CM USING (make, model))
                              INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
                  WHERE regno = %s """ 
-        cur.execute(sql, regno)
+        cur.execute(sql, (regno,))
         result = cur.fetchone()
         if (result is None):
             return None
@@ -208,7 +227,7 @@ def get_car_details(regno):
     conn.close()                    # Close the connection to the db
 
 
-    return result
+    return None
 
 def get_all_cars():
     # Get all cars that PeerCar has
@@ -282,7 +301,34 @@ def get_bay(name):
     # Get the information about the bay with this unique name
     # Make sure you're checking ordering ;)
 
-    return val
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        result = []
+        # Try executing the SQL and get from the database
+        sql = """SELECT name, description, address, gps_long, gps_lat
+                 FROM carbay 
+                 WHERE name = %s"""
+        cur.execute(sql, (name,))
+        result = cur.fetchone()
+        if (result is None):
+            return None
+
+        return result
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+    return None
+
 
 def search_bays(search_term):
     #val = [['SIT', '123 Some Street, Boulevard', '-33.887946', '151.192958']]
@@ -315,11 +361,73 @@ def search_bays(search_term):
     return None
 
 def get_cars_in_bay(bay_name):
-    val = [ ['66XY99', 'Ice the Cube'], ['WR3KD', 'Bob the SmartCar']]
 
-    # TODO
     # Get the cars inside the bay with the bay name
     # Cars who have this bay as their bay :)
     # Return simple details (only regno and name)
 
-    return val
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT C.regno, C.name
+                 FROM Car C INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
+                 WHERE CB.name = %s"""
+        cur.execute(sql, (bay_name,))
+        result = cur.fetchall()
+        if (result is None):
+            return None
+
+        return result
+
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+    
+    return None
+
+#################
+# ADDED METHODS #
+#################
+
+def get_num_bookings(email):
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT * 
+                    FROM get_num_bookings(%s)"""
+        cur.execute(sql, (email,))
+        result = cur.fetchone()
+
+        conn.commit()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+
+        if (result is None):
+            return None
+
+        return result
+        
+    except:
+        print("Error with Database")
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+    
+        return None
+
