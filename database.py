@@ -289,11 +289,12 @@ def get_bay(name):
     cur = conn.cursor()
 
     try:
+        result = []
         # Try executing the SQL and get from the database
         sql = """SELECT name, description, address, gps_long, gps_lat
                  FROM carbay 
                  WHERE name = %s"""
-        cur.execute(sql, name)
+        cur.execute(sql, (name,))
         result = cur.fetchone()
         if (result is None):
             return None
@@ -307,6 +308,7 @@ def get_bay(name):
         print("Error with Database")
     cur.close()                     # Close the cursor
     conn.close()                    # Close the connection to the db
+    return None
 
 
 def search_bays(search_term):
