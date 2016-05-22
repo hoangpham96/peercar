@@ -38,7 +38,7 @@ result = cur.fetchall()
 if (result is None): print("Result is none")
 
 for member in result:
-    unhashedpwd = member[3]
+    unhashedpwd = member[3].strip()
     print(unhashedpwd)
     hashedpwd = bcrypt.hashpw(unhashedpwd.encode(encoding = 'ascii'), bcrypt.gensalt()).decode('ascii')
     print(hashedpwd)
