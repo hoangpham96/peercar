@@ -47,21 +47,22 @@ def check_login(email, password):
 
     try:
         sql = """SELECT *
-                 FROM Member
-                 WHERE email=%s OR nickname =%s"""
-        cur.execute(sql, (email, email))
+                 FROM get_hash_and_salt(%s)"""
+        cur.execute(sql, (email,))
         result = cur.fetchone()
         cur.close()
         conn.close()
 
-        if (result is None):
+        if (result is None or len(result) < 1):
             return None
 
-        # Stored hash includes salt and hash of password
-        stored_hash = result[3].encode(encoding='ascii')
+        # Convert to the b'' type
+        stored_hash = result[0].encode(encoding='ascii')
+        stored_salt = result[1].encode(encoding='ascii')
         pwd = password.encode(encoding = 'ascii')
 
-        if (bcrypt.hashpw(pwd, stored_hash) == stored_hash):
+        # Compare them
+        if (bcrypt.hashpw(pwd, stored_salt)[30:] == stored_hash):
             return result
         else:
             return None

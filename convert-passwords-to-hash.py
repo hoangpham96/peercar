@@ -40,12 +40,13 @@ if (result is None): print("Result is none")
 for member in result:
     unhashedpwd = member[3]
     print(unhashedpwd)
-    hashedpwd = bcrypt.hashpw(unhashedpwd.encode(encoding = 'ascii'), bcrypt.gensalt()).decode('ascii')
-    print(hashedpwd)
+    salt = bcrypt.gensalt()
+    hashedpwd = (bcrypt.hashpw(unhashedpwd.encode(encoding = 'ascii'), salt).decode('ascii'))[29:]
+    salt = salt.decode('ascii')
     sql = """UPDATE Member
-    SET password = %s
+    SET password = %s, pw_salt = %s
     WHERE memberno = %s"""
-    cur.execute(sql, (hashedpwd, member[0]))
+    cur.execute(sql, (hashedpwd, salt, member[0]))
     conn.commit()
 
 cur.close()
