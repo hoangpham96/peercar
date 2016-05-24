@@ -55,7 +55,7 @@ def check_login(email, password):
         conn.close()
 
         if (result is None or len(result) < 1):
-            print('no result')
+            return None
 
         #Convert hashing components to the b'' type
         stored_salt = result[1].encode(encoding = 'ascii')
