@@ -290,7 +290,7 @@ def get_all_cars():
 ##  Bay (detail, list, finding cars inside bay)
 #####################################################
 
-def get_all_bays():
+def get_all_bays(hb):
 
     # Get all the bays that PeerCar has :)
     # And the number of bays
@@ -302,12 +302,17 @@ def get_all_bays():
     cur = conn.cursor()
 
     try:
+
         sql = """SELECT CB.name, CB.address, count(C.regno) AS count
                  FROM carbay CB INNER JOIN car C ON (CB.bayid = C.parkedat)
+                 where CB.name = %s
                  GROUP BY CB.name, CB.address
-                 ORDER BY name ASC"""
+                 UNION ALL
+                 SELECT CB.name, CB.address, count(C.regno) AS count
+                 FROM carbay CB INNER JOIN car C ON (CB.bayid = C.parkedat)
+                 GROUP BY CB.name, CB.address"""
 
-        cur.execute(sql)
+        cur.execute(sql, (hb,))
         result = cur.fetchall()
         cur.close()
         conn.close()
