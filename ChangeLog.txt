@@ -1,9 +1,6 @@
  - Hashed and salted the example data
 
 - Added additional method to database.py and a call to it in routes.new_booking
-  to update the user_details['booking stat'] value.
-
-- Added additional method to database.py and a call to it in routes.new_booking
   to update the user_details['Homebay'] with a name rather than a number.
 
 - Added code to routes.py to update the session's information once homebay is updated/ booking is made
@@ -14,3 +11,4 @@
 
 - Change /list-bookings template to add a Duration column
 
+- changes templates new_booking.html and routes.py to disallow bookings of 0 hours. database.py to rollback if make_booking fails. 
