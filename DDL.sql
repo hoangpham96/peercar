@@ -367,3 +367,23 @@ AS $$
 		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
 	END;
 $$ LANGUAGE plpgsql;
+
+--DROP FUNCTION IF EXISTS carsharing.get_all_cars();
+CREATE OR REPLACE FUNCTION carsharing.get_all_cars()
+	RETURNS TABLE(out_regno car.regno%TYPE,
+			out_name car.name%TYPE, 
+			out_make car.make%TYPE, 
+			out_model car.model%TYPE, 
+			out_year car.year%TYPE, 
+			out_transmission car.transmission%TYPE)
+AS $$
+	BEGIN
+
+		RETURN QUERY SELECT c.regno, c.name, c.make, c.model, c.year, c.transmission
+                 FROM Car c
+                 ORDER BY name ASC;	
+
+	EXCEPTION
+		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
+	END;
+$$ LANGUAGE plpgsql;
