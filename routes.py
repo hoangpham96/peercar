@@ -141,7 +141,7 @@ def list_bays():
                 val = []
                 flash("Error, no bays in our system.")
                 page['bar'] = False
-            return render_template('bay_list.html', bays=val, session=session)
+            return render_template('bay_list.html', bays=val, session=session, page=page)
 
         # Try to get from the database
         val = database.get_bay(bay)
@@ -158,8 +158,11 @@ def list_bays():
     elif(request.method == 'POST'):
         # The user is searching for a bay
         val = database.search_bays(request.form['search'])
-        if(val is None):
-            return render_template('bay_list.html', bays=[[]], session=session)
+        if(val is None or len(val) == 0):
+            val = [[]]
+            flash("There were no results matching your search criteria.")
+            page['bar'] = False
+            return render_template('bay_list.html', bays=val, session=session, page=page)
         else:
             return render_template('bay_list.html', bays=val, session=session)
 
