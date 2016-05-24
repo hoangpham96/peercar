@@ -262,3 +262,24 @@ def my_bookings():
     # If no booking, then get all the bookings made by the user
     val = database.get_all_bookings(user_details['email'])
     return render_template('bookings_list.html', bookings=val, session=session, page=page)
+
+
+#####################################################
+##  SHOW MY INVOICES
+#####################################################
+
+@app.route('/my-invoices')
+def my_invoices():
+    if( 'logged_in' not in session or not session['logged_in']):
+        return redirect(url_for('login'))
+
+    # inv_num = request.args.get('inv_num', '')
+
+    #Invoice detail
+    # if (inv_num != ''):
+    #     val = database.get_invoice(user_details['email'], inv_num)
+    #     return render_template('invoice_detail.html', invoice=val, session=session, page=page)
+    
+    #If no invoice,then get all the invoices by the user
+    val = database.get_all_invoices(user_details['email'])
+    return render_template('invoices_list.html', invoices=val, session=session, page=page)

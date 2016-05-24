@@ -456,3 +456,40 @@ def get_bayname(bayid):
         conn.close()                    # Close the connection to the db
     
         return None
+
+#Get all invoices from the user
+def get_all_invoices(email):
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+
+        # Try executing the SQL and get from the database
+        sql = """SELECT invoiceno, invoicedate, monthlyfee, totalamount 
+                 FROM invoice INNER JOIN member USING (memberno)
+                 WHERE email = %s
+                 ORDER BY invoiceno DESC """
+        cur.execute(sql, (email,))
+        result = cur.fetchall()
+
+
+        conn.commit()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+
+        if (result is None):
+            return None
+
+        return result
+        
+    except:
+        print("Error with Database")
+        conn.rollback()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+    
+        return None

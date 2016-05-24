@@ -11,4 +11,9 @@
 
 - Change /list-bookings template to add a Duration column
 
-- changes templates new_booking.html and routes.py to disallow bookings of 0 hours. database.py to rollback if make_booking fails. 
+- Changes templates new_booking.html and routes.py to disallow bookings of 0 hours. database.py to rollback if make_booking fails. 
+
+- Add invoices-list and invoice-detail to the templates
+
+- Add /my_invoices to routes.py
+
