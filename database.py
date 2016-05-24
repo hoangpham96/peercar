@@ -205,6 +205,7 @@ def get_booking(b_date, b_hour, car):
          print(result)
          if(result is None or result[0] is None):
          	return None
+            
          cur.close()
          conn.close()
  
@@ -232,16 +233,15 @@ def get_car_details(regno):
     try:
         result = []
         # Try executing the SQL and get from the database
-        sql = """SELECT regno, C.name, make, model, year, transmission, category, capacity, CB.name, walkscore, mapurl
-                 FROM (Car C INNER JOIN CarModel CM USING (make, model))
-                             INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
-                 WHERE regno = %s """ 
+        sql = """SELECT * FROM get_car_details(%s)""" 
         cur.execute(sql, (regno,))
         result = cur.fetchone()
         if (result is None):
+            conn.rollback()
             return None
-
-        return result
+        else:
+        	conn.commit()
+        	return result
 
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
@@ -249,11 +249,9 @@ def get_car_details(regno):
     except:
         # If there were any errors, return a NULL row printing an error to the debug
         print("Error with Database")
-    cur.close()                     # Close the cursor
-    conn.close()                    # Close the connection to the db
-
-
-    return None
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        return None
 
 def get_all_cars():
     # Get all cars that PeerCar has
