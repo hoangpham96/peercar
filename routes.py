@@ -189,6 +189,7 @@ def homebay():
         if(outcome):
             page['bar'] = True
             flash("Success, homebay updated!")
+            user_details['homebay'] = bay
         else:
             page['bar'] = False
             flash("There was an error adding your homebay.")
