@@ -81,9 +81,36 @@ def check_login(email, password):
 ##  Homebay
 #####################################################
 def update_homebay(email, bayname):
+
     # TODO
     # Update the user's homebay
-    return True
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Get homebay id from bayname
+        # Try executing the SQL and get from the database
+        sql = """SELECT * 
+                 FROM update_homebay(%s,%s)"""
+        cur.execute(sql, (email, bayname))
+        
+        conn.commit()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+        return True
+
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    conn.rollback()
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+    return False
 
 #####################################################
 ##  Booking (make, get all, get details)

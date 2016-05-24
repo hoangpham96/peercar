@@ -52,6 +52,40 @@ AS $$
 	END;
 $$ LANGUAGE plpgsql;
 
+/* update homebay from from email and bay name*/
+CREATE OR REPLACE FUNCTION update_homebay(input_email TEXT, input_bayname TEXT)
+	RETURNS BOOLEAN
+AS $$
+	DECLARE
+		current_bayid INTEGER;
+	BEGIN
+		current_bayid := NULL;
+
+		IF(input_email IS NULL 
+		OR input_bayname IS NULL) THEN 
+			RETURN FALSE;
+		END IF;
+
+		SELECT bayid
+		INTO current_bayid
+        FROM carbay
+        WHERE name=input_bayname;
+
+        IF (current_bayid IS NULL) THEN 
+        	RETURN FALSE;
+        END IF;
+
+        UPDATE Member
+        SET homebay=current_bayid
+        WHERE email=input_email;
+
+		RETURN TRUE;
+	EXCEPTION
+		WHEN OTHERS THEN RETURN FALSE;
+	END;
+$$ LANGUAGE plpgsql;
+
+
 /* resolve bay name from bay id*/
 --SELECT * FROM carbay;
 --DROP FUNCTION IF EXISTS get_bayname(input_bayid TEXT);
