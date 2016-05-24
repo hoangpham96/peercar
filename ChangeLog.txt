@@ -5,3 +5,7 @@
 
 - Added additional method to database.py and a call to it in routes.new_booking
   to update the user_details['Homebay'] with a name rather than a number.
+
+- Highlighted first result in list_bays.html
+
+- Passed homebay name to get_all_bays in routes.py

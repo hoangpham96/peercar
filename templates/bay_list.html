@@ -24,12 +24,12 @@
                         <td>{{ bays[0][1] }}</td>
                         <td>{{ bays[0][2] }}</td>
                     </tr>
-                    {% for bay in bays %}
-                    <tr>
-                        <td><a href="{{url_for('list_bays')}}?bay={{ bay[0] }}">{{ bay[0] }}</a></td>
-                        <td>{{ bay[1] }}</td>
-                        <td>{{ bay[2] }}</td>
-                    </tr>
+                    {% for bay in bays[1:] %}
+                                    <tr>
+                                        <td><a href="{{url_for('list_bays')}}?bay={{ bay[0] }}">{{ bay[0] }}</a></td>
+                                        <td>{{ bay[1] }}</td>
+                                        <td>{{ bay[2] }}</td>
+                                    </tr>
                     {% endfor %}
             </tbody>
         </table>
