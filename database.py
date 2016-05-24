@@ -93,7 +93,7 @@ def update_homebay(email, bayname):
         # Try executing the SQL and get from the database
         sql = """UPDATE Member
                  SET homebay=%s
-                 WHERE email=%s"""
+                 WHERE email=%s OR nickname=%s"""
         cur.execute(sql, (bayname, email))
         
         cur.close()                     # Close the cursor
