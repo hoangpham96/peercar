@@ -78,6 +78,7 @@ CREATE OR REPLACE FUNCTION gen_invoiceline()
 	RETURNS boolean
 AS $$
 	BEGIN
+		DELETE FROM InvoiceLine;
 		INSERT INTO InvoiceLine
 		select * from invoice_info_fee;
 		return true;
