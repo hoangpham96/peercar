@@ -295,8 +295,6 @@ def get_all_bays(hb):
         return ERROR_CODE
     cur = conn.cursor()
 
-    print(hb)
-
     try:
 
         sql = """SELECT CB.name, CB.address, count(C.regno) AS count

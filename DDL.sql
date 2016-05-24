@@ -52,6 +52,44 @@ AS $$
 	END;
 $$ LANGUAGE plpgsql;
 
+
+
+/* Invoice */
+SET search_path TO carsharing;
+
+create or replace view invoice_info as
+select memberno, invoiceno, bookingid, sum(distance) as sum_booking_distance, EXTRACT(epoch FROM B.endtime-B.starttime)/3600 as sum_booking_duration	
+from (Member M join Invoice I using(memberno) join Booking B on (M.memberno = B.madeby))
+	left outer join triplog T on (B.madeby = T.driver and T.car = B.car) 
+where extract(month from B.starttime) = extract(month from I.invoicedate) and extract(year from B.starttime) = extract(year from I.invoicedate)
+	and (B.starttime, B.endtime) overlaps (T.starttime, T.endtime)
+group by memberno, invoiceno, bookingid
+order by memberno, invoiceno, bookingid
+
+create or replace view invoice_info_fee as
+select IIV.*,
+	case when sum_booking_duration >= 12 then (MP.daily_rate*sum_booking_duration)::amountincents else (MP.hourly_rate*sum_booking_duration)::amountincents end as time_charge,
+	case when sum_booking_duration >= 12 then (MP.daily_km_rate*sum_booking_distance)::amountincents else (MP.km_rate*sum_booking_distance)::amountincents end as km_charge,
+	0::ammountincents
+from invoice_info IIV join member using (memberno) join membershipplan MP on (subscribed=title)
+
+
+CREATE OR REPLACE FUNCTION gen_invoiceline()
+	RETURNS boolean
+AS $$
+	BEGIN
+		INSERT INTO InvoiceLine
+		select * from invoice_info_fee;
+		return true;
+	EXCEPTION
+		WHEN OTHERS THEN return false;
+	END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+
 /* update homebay from from email and bay name*/
 CREATE OR REPLACE FUNCTION update_homebay(input_email TEXT, input_bayname TEXT)
 	RETURNS BOOLEAN
