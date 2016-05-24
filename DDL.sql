@@ -53,41 +53,7 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 
-/* Populate invoice table*/
-CREATE OR REPLACE FUNCTION populate_invoice(member_email TEXT, invoice_month integer, invoice_year integer)
-	RETURNS BOOLEAN
-AS $$	DECLARE
-		invoicenum integer,
-		membernum integer,
-		total amountsincent
-	BEGIN
-		membernum  := (select memberno from member where email = member_email)
-		
-		SELECT max(invoiceno) INTO invoicenum
-		FROM Invoice join member using (memberno)
-		WHERE email = member_email;
 
-		IF (invoicenum is NULL) then invoicenum := 1;
-		else invoicenum := invoicenum+1;
-
-		INSERT INTO Invoice 
-		SELECT M.memberno, invoicenum, B.bookingid, monthly_fee, 0
-		FROM (member M join booking B on (B.madeby = M.memberno)) join membershipplan MP on (M.subscribed = MP.title);
-		
-		SELECT * FROM gen_invoiceline();
-
-		total := SELECT timecharge+kmcharge FROM invoiceline where memberno = membernum;
-
-		UPDATE Invoice
-		SET totalamount = total
-		WHERE memberno = membernum;
-
-		return true;
-		
-	EXCEPTION
-		WHEN OTHERS THEN RETURN FALSE;
-	END;
-$$ LANGUAGE plpgsql;
 
 
 /* Invoice */
@@ -120,6 +86,42 @@ AS $$
 		return true;
 	EXCEPTION
 		WHEN OTHERS THEN return false;
+	END;
+$$ LANGUAGE plpgsql;
+
+/* Populate invoice table*/
+CREATE OR REPLACE FUNCTION populate_invoice(member_email TEXT, invoice_month integer, invoice_year integer)
+	RETURNS BOOLEAN
+AS $$	DECLARE
+		invoicenum integer;
+		membernum integer;
+		total amountincents;
+	BEGIN
+		select memberno into membernum from member where email = member_email;
+		
+		SELECT max(invoiceno) INTO invoicenum
+		FROM Invoice join member using (memberno)
+		WHERE email = member_email;
+
+		IF (invoicenum is NULL) then invoicenum := 1;
+		else invoicenum := invoicenum+1;
+		end if;
+
+		INSERT INTO Invoice 
+		SELECT M.memberno, invoicenum, invoice_month::month + invoice_year::year, monthly_fee, 0
+		FROM member M join membershipplan MP on (M.subscribed = MP.title);
+		
+		SELECT * FROM gen_invoiceline();
+
+		SELECT timecharge+kmcharge INTO total FROM invoiceline where memberno = membernum;
+
+		UPDATE Invoice
+		SET totalamount = total
+		WHERE memberno = membernum;
+
+		RETURN TRUE;
+	EXCEPTION 
+		WHEN OTHERS THEN RETURN FALSE;
 	END;
 $$ LANGUAGE plpgsql;
 
