@@ -217,8 +217,9 @@ def new_booking():
             flash("Error, there is no car to book in the system")
             page['bar'] = False
             return(redirect(url_for('index')))
-        times = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
-        return render_template('new_booking.html', cars=cars, times=times, session=session, page=page, from_car=from_car)
+        start_times = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+        duration_times = [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+        return render_template('new_booking.html', cars=cars, start_times=start_times, duration_times=duration_times,  session=session, page=page, from_car=from_car)
     # If we're making the booking
     success = database.make_booking(user_details['email'],
                                 request.form['car_regno'],

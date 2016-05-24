@@ -24,7 +24,7 @@
             <div class="pure-control-group">
                 <label for="book_hour"> Start Hour: </label>
                 <select name="book_hour" placeholder="Time" required>
-                    {% for hour in times %}
+                    {% for hour in start_times %}
                         <option value="{{hour}}">{{hour}}:00</option>
                     {% endfor %}
                 </select>
@@ -32,7 +32,7 @@
             <div class="pure-control-group">
                 <label for="duration"> Duration: </label>
                 <select name="duration" placeholder="Time" required>
-                    {% for hour in times %}
+                    {% for hour in duration_times %}
                         <option value="{{hour}}">{{hour}} hours</option>
                     {% endfor %}
                 </select>

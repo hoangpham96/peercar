@@ -125,19 +125,24 @@ def make_booking(email, car_rego, date, hour, duration):
     cur = conn.cursor()
 
     try:
+        result = True
         # Try executing the SQL and get from the database
         sql = """SELECT *
                  FROM make_booking(%s, %s, %s, %s, %s)"""
         cur.execute(sql, (email, car_rego, date, hour, duration,))
         val = cur.fetchone()
-        conn.commit()
+        if(val is None or val[0] == None or val[0] == False):
+            conn.rollback()
+            result = False
+        else:
+            conn.commit()
+            result = True
+            
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
 
-        if(val is None or len(val) < 1):
-            return False
-        else:
-            return val[0]
+        return result
+        
     except:
         # If there were any errors return false
         print("Error with Database")
