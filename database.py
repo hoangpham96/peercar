@@ -92,11 +92,20 @@ def update_homebay(email, bayname):
     cur = conn.cursor()
 
     try:
+        # Get homebay id from bayname
+        # Try executing the SQL and get from the database
+        sql = """SELECT bayid
+                 FROM carbay
+                 WHERE name=%s"""
+        cur.execute(sql, (bayname, ))
+        bayid = cur.fetchone()
+
+        # Update homebay
         # Try executing the SQL and get from the database
         sql = """UPDATE Member
                  SET homebay=%s
                  WHERE email=%s OR nickname=%s"""
-        cur.execute(sql, (bayname, email))
+        cur.execute(sql, (bayid, email, email,))
         
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
