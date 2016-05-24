@@ -190,30 +190,32 @@ def get_booking(b_date, b_hour, car):
      cur = conn.cursor()
  
      try:
-         sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
-                  EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
-                  FROM member INNER JOIN booking ON (madeby = memberno)
-                  INNER JOIN car ON (car = regno)
-                  INNER JOIN carbay ON (parkedat = bayid)
-                  WHERE whenbooked::date = %s
-                  AND EXTRACT(hour from whenbooked) = %s
-                  AND car = %s"""
- 
+     	 #val = ['Shadow', '66XY99', 'Ice the Cube', '01-05-2016', '10', '4', '29-04-2016', 'SIT']
+         # sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
+         #          EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
+         #          FROM member INNER JOIN booking ON (madeby = memberno)
+         #          INNER JOIN car ON (car = regno)
+         #          INNER JOIN carbay ON (parkedat = bayid)
+         #          WHERE whenbooked::date = %s
+         #          AND EXTRACT(hour from whenbooked) = %s
+         #          AND car = %s"""
+         sql = """SELECT * FROM get_booking(%s, %s, %s)"""
          cur.execute(sql, (b_date, b_hour, car))
          result = cur.fetchone()
+         print(result)
+         if(result is None or result[0] is None):
+         	return None
          cur.close()
          conn.close()
  
          return result
  
      except:
-         print("Error with Database")
- 
-     cur.close()
-     conn.close()
- 
-     return None
-
+        print("Error with Database")
+        conn.rollback()
+        cur.close()
+        conn.close()
+        return None
 
 #####################################################
 ##  Car (Details and List)
