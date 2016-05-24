@@ -299,9 +299,6 @@ CREATE OR REPLACE FUNCTION carsharing.get_booking(
 	END;
 $$ LANGUAGE plpgsql;
 
-SELECT * FROM car LIMIT 1;
-SELECT * FROM carmodel LIMIT 1;
-SELECT * FROM carbay LIMIT 1;
 /* Get number of bookins stat of user */
 --DROP FUNCTION IF EXISTS get_car_details(input_regno TEXT);
 CREATE OR REPLACE FUNCTION carsharing.get_car_details(input_regno TEXT)
