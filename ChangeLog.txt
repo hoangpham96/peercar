@@ -17,3 +17,7 @@
 
 - Add /my_invoices to routes.py
 
+- Highlighted first result in list_bays.html
+
+- Passed homebay name to get_all_bays in routes.py
+

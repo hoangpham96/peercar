@@ -53,8 +53,6 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 
-
-
 /* Populate invoice table*/
 CREATE OR REPLACE FUNCTION populate_invoice(member_email TEXT, invoice_month integer, invoice_year integer)
 	RETURNS BOOLEAN
@@ -88,6 +86,40 @@ AS $$	DECLARE
 		
 	EXCEPTION
 		WHEN OTHERS THEN RETURN FALSE;
+	END;
+$$ LANGUAGE plpgsql;
+
+
+/* Invoice */
+SET search_path TO carsharing;
+
+create or replace view invoice_info as
+select memberno, invoiceno, bookingid, sum(distance) as sum_booking_distance, EXTRACT(epoch FROM B.endtime-B.starttime)/3600 as sum_booking_duration	
+from (Member M join Invoice I using(memberno) join Booking B on (M.memberno = B.madeby))
+	left outer join triplog T on (B.madeby = T.driver and T.car = B.car) 
+where extract(month from B.starttime) = extract(month from I.invoicedate) and extract(year from B.starttime) = extract(year from I.invoicedate)
+	and (B.starttime, B.endtime) overlaps (T.starttime, T.endtime)
+group by memberno, invoiceno, bookingid
+order by memberno, invoiceno, bookingid
+
+create or replace view invoice_info_fee as
+select IIV.*,
+	case when sum_booking_duration >= 12 then (MP.daily_rate*sum_booking_duration)::amountincents else (MP.hourly_rate*sum_booking_duration)::amountincents end as time_charge,
+	case when sum_booking_duration >= 12 then (MP.daily_km_rate*sum_booking_distance)::amountincents else (MP.km_rate*sum_booking_distance)::amountincents end as km_charge,
+	0::ammountincents
+from invoice_info IIV join member using (memberno) join membershipplan MP on (subscribed=title)
+
+
+CREATE OR REPLACE FUNCTION gen_invoiceline()
+	RETURNS boolean
+AS $$
+	BEGIN
+		DELETE FROM InvoiceLine;
+		INSERT INTO InvoiceLine
+		select * from invoice_info_fee;
+		return true;
+	EXCEPTION
+		WHEN OTHERS THEN return false;
 	END;
 $$ LANGUAGE plpgsql;
 
@@ -308,5 +340,66 @@ AS $$
 
 	EXCEPTION
 		WHEN OTHERS THEN RETURN NULL;
+	END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION carsharing.get_booking(
+    IN input_date text,
+    IN input_hour text,
+    IN input_regno text)
+  RETURNS TABLE(full_name text, car_reg regotype, car_name character varying, start_date date, start_hour integer, duration integer, booked_date date, carbay_name character varying) 
+  AS $$
+	
+	DECLARE
+		booking_date date;
+		booking_hour integer;	
+	BEGIN
+		booking_date := input_date;
+		booking_hour := input_hour;
+
+		
+		RETURN QUERY
+			SELECT CAST((m.nametitle || ', ' || m.namegiven || ' ' || namefamily) AS TEXT),
+				c.regno, c.name, CAST(starttime AS DATE), CAST(EXTRACT(hour FROM starttime) AS INT), CAST(EXTRACT(epoch FROM endtime-starttime)/3600 AS INT),
+				CAST(whenbooked AS DATE), cb.name
+			FROM member m INNER JOIN booking b ON (madeby = memberno)
+			INNER JOIN car c ON (car = regno)
+			INNER JOIN carbay cb ON (parkedat = bayid)
+			WHERE starttime::date = booking_date
+			AND CAST(EXTRACT(hour from starttime) AS INT) = booking_hour
+			AND car = input_regno;
+	EXCEPTION
+		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
+	END;
+$$ LANGUAGE plpgsql;
+
+/* Get number of bookins stat of user */
+--DROP FUNCTION IF EXISTS get_car_details(input_regno TEXT);
+CREATE OR REPLACE FUNCTION carsharing.get_car_details(input_regno TEXT)
+	RETURNS TABLE( out_regno car.regno%TYPE,
+			out_name car.name%TYPE,
+			out_make car.make%TYPE,
+			out_model car.model%TYPE,
+			out_year car.year%TYPE,
+			out_transmission car.transmission%TYPE,
+			out_category carmodel.category%TYPE,
+			out_capacity carmodel.capacity%TYPE,
+			out_bayname carbay.name%TYPE,
+			out_walkscore carbay.walkscore%TYPE,
+			out_mapurl carbay.mapurl%TYPE)
+AS $$
+	DECLARE
+		car_regno car.regno%TYPE;
+	BEGIN
+		car_regno := TRIM(input_regno);
+
+		RETURN QUERY SELECT regno, C.name, make, model, year, transmission, category, capacity, CB.name, walkscore, mapurl
+                 FROM (Car C INNER JOIN CarModel CM USING (make, model))
+                             INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
+                 WHERE regno = car_regno;
+
+	EXCEPTION
+		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
 	END;
 $$ LANGUAGE plpgsql;

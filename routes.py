@@ -136,7 +136,7 @@ def list_bays():
         val = None
         if(bay == ''):
             # No bay specified, try to get all the bays in a list
-            val = database.get_all_bays()
+            val = database.get_all_bays(user_details['homebay'])
             if(val is None):
                 val = []
                 flash("Error, no bays in our system.")
