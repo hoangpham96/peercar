@@ -194,7 +194,7 @@ AS $$
 		IF(EXISTS (SELECT *
 				FROM booking b
 				WHERE (b.car = booking_car OR b.madeby = booking_memberno)
-					AND (b.starttime, b.endtime) OVERLAPS (booking_starttime, booking_endtime))) THEN
+					AND (b.starttime, b.endtime) OVERLAPS (booking_starttime + 1 * interval '1 second', booking_endtime - 1 * interval '1 second'))) THEN
 			RETURN FALSE;
 		END IF;
 		

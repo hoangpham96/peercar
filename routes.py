@@ -226,9 +226,7 @@ def new_booking():
                                 request.form['duration'])
     if(success == True):
         #update number of bookins field
-        val = database.get_num_bookings(user_details['email'])
-        if (val is not None):
-            user_details['num_bookings'] = val
+        user_details['num_bookings'] += 1
         
         page['bar'] = True
         flash("Booking Successful!")
