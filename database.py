@@ -263,15 +263,15 @@ def get_all_cars():
 
     try:
         # Try executing the SQL and get from the database
-        sql = """SELECT regno, name, make, model, year, transmission
-                 FROM Car
-                 ORDER BY name ASC"""
+        sql = """SELECT * FROM get_all_cars()"""
         cur.execute(sql)
         result = cur.fetchall()
-        if (result is None):
+        if (result is None or len(result) == 0):
+            conn.rollback()
             return None
-
-        return result
+        else:
+            conn.commit()
+            return result
 
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
@@ -279,8 +279,9 @@ def get_all_cars():
     except:
         # If there were any errors, return a NULL row printing an error to the debug
         print("Error with Database")
-    cur.close()                     # Close the cursor
-    conn.close()                    # Close the connection to the db
+        conn.rollback()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
 
 
     return None

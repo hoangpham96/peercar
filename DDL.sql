@@ -82,43 +82,6 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 
-/* Populate invoice table*/
-CREATE OR REPLACE FUNCTION populate_invoice(member_email TEXT, invoice_month integer, invoice_year integer)
-	RETURNS BOOLEAN
-AS $$	DECLARE
-		invoicenum integer,
-		membernum integer,
-		total amountsincent
-	BEGIN
-		membernum  := (select memberno from member where email = member_email)
-		
-		SELECT max(invoiceno) INTO invoicenum
-		FROM Invoice join member using (memberno)
-		WHERE email = member_email;
-
-		IF (invoicenum is NULL) then invoicenum := 1;
-		else invoicenum := invoicenum+1;
-
-		INSERT INTO Invoice 
-		SELECT M.memberno, invoicenum, B.bookingid, monthly_fee, 0
-		FROM (member M join booking B on (B.madeby = M.memberno)) join membershipplan MP on (M.subscribed = MP.title);
-		
-		SELECT * FROM gen_invoiceline();
-
-		total := SELECT timecharge+kmcharge FROM invoiceline where memberno = membernum;
-
-		UPDATE Invoice
-		SET totalamount = total
-		WHERE memberno = membernum;
-
-		return true;
-		
-	EXCEPTION
-		WHEN OTHERS THEN RETURN FALSE;
-	END;
-$$ LANGUAGE plpgsql;
-
-
 /* Invoice */
 SET search_path TO carsharing;
 
@@ -129,15 +92,14 @@ from (Member M join Invoice I using(memberno) join Booking B on (M.memberno = B.
 where extract(month from B.starttime) = extract(month from I.invoicedate) and extract(year from B.starttime) = extract(year from I.invoicedate)
 	and (B.starttime, B.endtime) overlaps (T.starttime, T.endtime)
 group by memberno, invoiceno, bookingid
-order by memberno, invoiceno, bookingid
+order by memberno, invoiceno, bookingid;
 
 create or replace view invoice_info_fee as
 select IIV.*,
 	case when sum_booking_duration >= 12 then (MP.daily_rate*sum_booking_duration)::amountincents else (MP.hourly_rate*sum_booking_duration)::amountincents end as time_charge,
 	case when sum_booking_duration >= 12 then (MP.daily_km_rate*sum_booking_distance)::amountincents else (MP.km_rate*sum_booking_distance)::amountincents end as km_charge,
-	0::ammountincents
-from invoice_info IIV join member using (memberno) join membershipplan MP on (subscribed=title)
-
+	0
+from invoice_info IIV join member using (memberno) join membershipplan MP on (subscribed=title);
 
 CREATE OR REPLACE FUNCTION gen_invoiceline()
 	RETURNS boolean
@@ -149,6 +111,42 @@ AS $$
 		return true;
 	EXCEPTION
 		WHEN OTHERS THEN return false;
+	END;
+$$ LANGUAGE plpgsql;
+
+/* Populate invoice table*/
+CREATE OR REPLACE FUNCTION populate_invoice(member_email TEXT, invoice_month integer, invoice_year integer)
+	RETURNS BOOLEAN
+AS $$	DECLARE
+		invoicenum integer;
+		membernum integer;
+		total amountincents;
+	BEGIN
+		select memberno into membernum from member where email = member_email;
+		
+		SELECT max(invoiceno) INTO invoicenum
+		FROM Invoice join member using (memberno)
+		WHERE email = member_email;
+
+		IF (invoicenum is NULL) then invoicenum := 1;
+		else invoicenum := invoicenum+1;
+		end if;
+
+		INSERT INTO Invoice 
+		SELECT M.memberno, invoicenum, invoice_month::month + invoice_year::year, monthly_fee, 0
+		FROM member M join membershipplan MP on (M.subscribed = MP.title);
+		
+		SELECT * FROM gen_invoiceline();
+
+		SELECT timecharge+kmcharge INTO total FROM invoiceline where memberno = membernum;
+
+		UPDATE Invoice
+		SET totalamount = total
+		WHERE memberno = membernum;
+
+		RETURN TRUE;
+	EXCEPTION 
+		WHEN OTHERS THEN RETURN FALSE;
 	END;
 $$ LANGUAGE plpgsql;
 
@@ -427,6 +425,26 @@ AS $$
                  FROM (Car C INNER JOIN CarModel CM USING (make, model))
                              INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
                  WHERE regno = car_regno;
+
+	EXCEPTION
+		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
+	END;
+$$ LANGUAGE plpgsql;
+
+--DROP FUNCTION IF EXISTS carsharing.get_all_cars();
+CREATE OR REPLACE FUNCTION carsharing.get_all_cars()
+	RETURNS TABLE(out_regno car.regno%TYPE,
+			out_name car.name%TYPE, 
+			out_make car.make%TYPE, 
+			out_model car.model%TYPE, 
+			out_year car.year%TYPE, 
+			out_transmission car.transmission%TYPE)
+AS $$
+	BEGIN
+
+		RETURN QUERY SELECT c.regno, c.name, c.make, c.model, c.year, c.transmission
+                 FROM Car c
+                 ORDER BY name ASC;	
 
 	EXCEPTION
 		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
