@@ -198,10 +198,10 @@ AS $$
 			RETURN FALSE;
 		END IF;
 
-		-- Unsure about this
-		/*IF(booking_duration < 1) THEN
+		
+		IF(booking_duration < 1) THEN
 			RETURN FALSE;
-		END IF;*/
+		END IF;
 
 		--look up memberno associated with the email/nick
 		SELECT m.memberno
