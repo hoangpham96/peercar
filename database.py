@@ -106,7 +106,6 @@ def update_homebay(email, bayname):
                  SET homebay=%s
                  WHERE email=%s """
         cur.execute(sql, (bayid, email))
-        print('asdf')
         
         conn.commit()
         cur.close()                     # Close the cursor
@@ -117,6 +116,7 @@ def update_homebay(email, bayname):
     except:
         # If there were any errors, return a NULL row printing an error to the debug
         print("Error with Database")
+    conn.rollback()
     cur.close()                     # Close the cursor
     conn.close()                    # Close the connection to the db
     return False
