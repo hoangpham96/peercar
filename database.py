@@ -403,9 +403,7 @@ def get_cars_in_bay(bay_name):
 
     try:
         # Try executing the SQL and get from the database
-        sql = """SELECT C.regno, C.name
-                 FROM Car C INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
-                 WHERE CB.name = %s"""
+        sql = """SELECT * FROM get_cars_in_bay(%s)"""
         cur.execute(sql, (bay_name,))
         result = cur.fetchall()
         if (result is None):
@@ -471,10 +469,7 @@ def get_all_invoices(email):
     try:
 
         # Try executing the SQL and get from the database
-        sql = """SELECT invoiceno, invoicedate, monthlyfee, totalamount 
-                 FROM invoice INNER JOIN member USING (memberno)
-                 WHERE email = %s
-                 ORDER BY invoiceno DESC """
+        sql = """SELECT * FROM get_all_invoices(%s)"""
         cur.execute(sql, (email,))
         result = cur.fetchall()
 

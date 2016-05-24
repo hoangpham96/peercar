@@ -52,6 +52,35 @@ AS $$
 	END;
 $$ LANGUAGE plpgsql;
 
+/* Get all cars in bay using bay name*/
+CREATE OR REPLACE FUNCTION get_cars_in_bay(bay_name TEXT)
+	RETURNS TABLE(registration Car.regno%TYPE, car_name character varying(40))
+AS $$
+	BEGIN
+		RETURN QUERY
+			SELECT C.regno, C.name
+			FROM Car C INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
+			WHERE CB.name = bay_name;
+	EXCEPTION
+		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
+	END;
+$$ LANGUAGE plpgsql;
+
+/* Get all invoices using members email*/
+CREATE OR REPLACE FUNCTION get_all_invoices(member_email TEXT)
+	RETURNS TABLE(f1 integer, f2 date, f3 amountincents, f4 amountincents)
+AS $$
+	BEGIN
+		RETURN QUERY
+			SELECT invoiceno, invoicedate, monthlyfee, totalamount 
+			FROM invoice INNER JOIN member USING (memberno)
+			WHERE email = member_email OR nickname = member_email
+			ORDER BY invoiceno DESC;
+	EXCEPTION
+		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
+	END;
+$$ LANGUAGE plpgsql;
+
 
 /* Populate invoice table*/
 CREATE OR REPLACE FUNCTION populate_invoice(member_email TEXT, invoice_month integer, invoice_year integer)
