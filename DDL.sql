@@ -52,6 +52,49 @@ AS $$
 	END;
 $$ LANGUAGE plpgsql;
 
+
+
+
+/* Populate invoice table*/
+CREATE OR REPLACE FUNCTION populate_invoice(member_email TEXT, invoice_month integer, invoice_year integer)
+	RETURNS BOOLEAN
+AS $$	DECLARE
+		invoicenum integer,
+		membernum integer,
+		total amountsincent
+	BEGIN
+		membernum  := (select memberno from member where email = member_email)
+		
+		SELECT max(invoiceno) INTO invoicenum
+		FROM Invoice join member using (memberno)
+		WHERE email = member_email;
+
+		IF (invoicenum is NULL) then invoicenum := 1;
+		else invoicenum := invoicenum+1;
+
+		INSERT INTO Invoice 
+		SELECT M.memberno, invoicenum, B.bookingid, monthly_fee, 0
+		FROM (member M join booking B on (B.madeby = M.memberno)) join membershipplan MP on (M.subscribed = MP.title);
+		
+		SELECT * FROM gen_invoiceline();
+
+		total := SELECT timecharge+kmcharge FROM invoiceline where memberno = membernum;
+
+		UPDATE Invoice
+		SET totalamount = total
+		WHERE memberno = membernum;
+
+		return true;
+		
+	EXCEPTION
+		WHEN OTHERS THEN RETURN FALSE;
+	END;
+$$ LANGUAGE plpgsql;
+
+
+
+
+
 /* update homebay from from email and bay name*/
 CREATE OR REPLACE FUNCTION update_homebay(input_email TEXT, input_bayname TEXT)
 	RETURNS BOOLEAN
