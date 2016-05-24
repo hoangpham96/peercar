@@ -12,7 +12,7 @@
                 <th></th>
             </tr>
         </thead>
-        {% if bookings %}
+        {% if invoices %}
         <tbody>
             {% for item in invoices %}
             <tr class="clickable-tr" data-href="{{url_for('my_invoices')}}?inv_num={{item[0]}}">

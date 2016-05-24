@@ -461,9 +461,10 @@ def get_all_invoices(email):
     try:
 
         # Try executing the SQL and get from the database
-        sql = """SELECT memberno, invoiceno, invoicedate, monthlyfee, totalamount 
+        sql = """SELECT invoiceno, invoicedate, monthlyfee, totalamount 
                  FROM invoice INNER JOIN member USING (memberno)
-                 WHERE email = %s """
+                 WHERE email = %s
+                 ORDER BY invoiceno DESC """
         cur.execute(sql, (email,))
         result = cur.fetchall()
 
