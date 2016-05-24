@@ -98,24 +98,28 @@ def update_homebay(email, bayname):
                  FROM carbay
                  WHERE name=%s"""
         cur.execute(sql, (bayname, ))
-        bayid = cur.fetchone()
+        bayid = cur.fetchone()[0]
 
         # Update homebay
         # Try executing the SQL and get from the database
         sql = """UPDATE Member
                  SET homebay=%s
-                 WHERE email=%s OR nickname=%s"""
-        cur.execute(sql, (bayid, email, email,))
+                 WHERE email=%s """
+        cur.execute(sql, (bayid, email))
+        print('asdf')
         
+        conn.commit()
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
         
+        return True
+
     except:
         # If there were any errors, return a NULL row printing an error to the debug
         print("Error with Database")
     cur.close()                     # Close the cursor
     conn.close()                    # Close the connection to the db
-    return True
+    return False
 
 #####################################################
 ##  Booking (make, get all, get details)
