@@ -57,9 +57,9 @@ CREATE OR REPLACE FUNCTION update_homebay(input_email TEXT, input_bayname TEXT)
 	RETURNS BOOLEAN
 AS $$
 	DECLARE
-		bayid INTEGER;
+		current_bayid INTEGER;
 	BEGIN
-		bayid := NULL;
+		current_bayid := NULL;
 
 		IF(input_email IS NULL 
 		OR input_bayname IS NULL) THEN 
@@ -67,16 +67,16 @@ AS $$
 		END IF;
 
 		SELECT bayid
-		INTO bayid
+		INTO current_bayid
         FROM carbay
         WHERE name=input_bayname;
 
-        IF (bayid IS NULL) THEN 
+        IF (current_bayid IS NULL) THEN 
         	RETURN FALSE;
         END IF;
 
         UPDATE Member
-        SET homebay=bayid
+        SET homebay=current_bayid
         WHERE email=input_email;
 
 		RETURN TRUE;
