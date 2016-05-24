@@ -117,7 +117,7 @@ def list_cars():
         flash("Error, car \'{}\' does not exist".format(car))
         page['bar'] = False
 
-    return render_template('car_detail.html', car=val, session=session)
+    return render_template('car_detail.html', car=val, session=session, page=page)
 
 #####################################################
 ##  LIST BAYS
@@ -189,6 +189,7 @@ def homebay():
         if(outcome):
             page['bar'] = True
             flash("Success, homebay updated!")
+            user_details['homebay'] = bay
         else:
             page['bar'] = False
             flash("There was an error adding your homebay.")
@@ -226,9 +227,7 @@ def new_booking():
                                 request.form['duration'])
     if(success == True):
         #update number of bookins field
-        val = database.get_num_bookings(user_details['email'])
-        if (val is not None):
-            user_details['num_bookings'] = val
+        user_details['num_bookings'] += 1
         
         page['bar'] = True
         flash("Booking Successful!")

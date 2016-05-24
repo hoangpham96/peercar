@@ -5,3 +5,12 @@
 
 - Added additional method to database.py and a call to it in routes.new_booking
   to update the user_details['Homebay'] with a name rather than a number.
+
+- Added code to routes.py to update the session's information once homebay is updated/ booking is made
+
+- Added code to routes.py to resolve session's detail
+
+- Fixed a few renders by adding 'page=page' to the end of the render_template()
+
+- Change /list-bookings template to add a Duration column
+

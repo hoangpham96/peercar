@@ -81,16 +81,42 @@ def check_login(email, password):
 ##  Homebay
 #####################################################
 def update_homebay(email, bayname):
+
     # TODO
     # Update the user's homebay
-    return True
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Get homebay id from bayname
+        # Try executing the SQL and get from the database
+        sql = """SELECT * 
+                 FROM update_homebay(%s,%s)"""
+        cur.execute(sql, (email, bayname))
+        
+        conn.commit()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+        return True
+
+    except:
+        # If there were any errors, return a NULL row printing an error to the debug
+        print("Error with Database")
+    conn.rollback()
+    cur.close()                     # Close the cursor
+    conn.close()                    # Close the connection to the db
+    return False
 
 #####################################################
 ##  Booking (make, get all, get details)
 #####################################################
 
 def make_booking(email, car_rego, date, hour, duration):
-    print('%s, %s, %s, %s, %s' % (email, car_rego, date, hour, duration))
 
     # #Ask for the database connection, and get the cursor set up
     conn = database_connect()
@@ -391,40 +417,6 @@ def get_cars_in_bay(bay_name):
 #################
 # ADDED METHODS #
 #################
-
-def get_num_bookings(email):
-
-    # Ask for the database connection, and get the cursor set up
-    conn = database_connect()
-    if(conn is None):
-        return ERROR_CODE
-    cur = conn.cursor()
-
-    try:
-        # Try executing the SQL and get from the database
-        sql = """SELECT * 
-                    FROM get_num_bookings(%s)"""
-        cur.execute(sql, (email,))
-        result = cur.fetchone()
-
-        conn.commit()
-        cur.close()                     # Close the cursor
-        conn.close()                    # Close the connection to the db
-        
-
-        if (result is None):
-            return None
-
-        return result
-        
-    except:
-        print("Error with Database")
-        conn.rollback()
-        cur.close()                     # Close the cursor
-        conn.close()                    # Close the connection to the db
-    
-        return None
-
 def get_bayname(bayid):
 
     # Ask for the database connection, and get the cursor set up
