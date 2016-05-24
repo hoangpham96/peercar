@@ -66,15 +66,14 @@ from (Member M join Invoice I using(memberno) join Booking B on (M.memberno = B.
 where extract(month from B.starttime) = extract(month from I.invoicedate) and extract(year from B.starttime) = extract(year from I.invoicedate)
 	and (B.starttime, B.endtime) overlaps (T.starttime, T.endtime)
 group by memberno, invoiceno, bookingid
-order by memberno, invoiceno, bookingid
+order by memberno, invoiceno, bookingid;
 
 create or replace view invoice_info_fee as
 select IIV.*,
 	case when sum_booking_duration >= 12 then (MP.daily_rate*sum_booking_duration)::amountincents else (MP.hourly_rate*sum_booking_duration)::amountincents end as time_charge,
 	case when sum_booking_duration >= 12 then (MP.daily_km_rate*sum_booking_distance)::amountincents else (MP.km_rate*sum_booking_distance)::amountincents end as km_charge,
-	0::ammountincents
-from invoice_info IIV join member using (memberno) join membershipplan MP on (subscribed=title)
-
+	0
+from invoice_info IIV join member using (memberno) join membershipplan MP on (subscribed=title);
 
 CREATE OR REPLACE FUNCTION gen_invoiceline()
 	RETURNS boolean
