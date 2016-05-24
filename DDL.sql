@@ -1,18 +1,80 @@
-﻿
 ﻿/*set carsharing as the default schema*/
 SET search_path TO carsharing;
 
-ALTER TABLE member ALTER password SET DATA TYPE CHAR(60);
-ALTER TABLE member DROP COLUMN pw_salt;
+ALTER TABLE member ALTER password SET DATA TYPE CHAR(31);
+ALTER TABLE member ALTER pw_salt SET DATA TYPE CHAR(29);
 
 
 --------------------------------------
 -- PROCEDURES --
 --------------------------------------
 
+/* Return the relevant Login details */
+--SELECT * FROM member where memberno = 1;
+--SELECT * FROM login('drfoster');
+--DROP FUNCTION IF EXISTS login(input_email TEXT);
+CREATE OR REPLACE FUNCTION login(input_email TEXT)
+	RETURNS TABLE(result_password member.password%TYPE, 
+			result_pw_salt member.pw_salt%TYPE,
+			result_email member.email%TYPE, 
+			result_nickname member.nickname%TYPE, 
+			result_nametitle member.nametitle%TYPE, 
+			result_namegiven member.namegiven%TYPE,
+			result_namefamily member.namefamily%TYPE,
+			result_address member.address%TYPE,
+			result_since member.since%TYPE,
+			result_homebay member.homebay%TYPE,
+			result_subscribed member.subscribed%TYPE,
+			result_stat_nrofbookings member.stat_nrofbookings%TYPE)
+			--Making a type is the same damn work.
+AS $$
+	BEGIN
+		IF(input_email IS NULL) THEN 
+			RETURN QUERY SELECT NULL;
+		END IF;
+
+		RETURN QUERY SELECT password,
+					pw_salt,
+					email, 
+					nickname, 
+					nametitle, 
+					namegiven,
+					namefamily,
+					address,
+					since,
+					homebay, 
+					subscribed,
+					stat_nrofbookings
+					
+				FROM member
+				WHERE LOWER(email) = LOWER(TRIM(input_email)) 
+					OR nickname = TRIM(input_email);
+	END;
+$$ LANGUAGE plpgsql;
+
+/* resolve bay name from bay id*/
+--SELECT * FROM carbay;
+--DROP FUNCTION IF EXISTS get_bayname(input_bayid TEXT);
+CREATE OR REPLACE FUNCTION get_bayname(input_bayid TEXT)
+	RETURNS TABLE(result_name carbay.name%TYPE)
+AS $$
+	BEGIN
+		IF(input_bayid IS NULL) THEN 
+			RETURN QUERY SELECT NULL;
+		END IF;
+
+		RETURN QUERY SELECT name
+				FROM carbay
+				WHERE bayid = CAST(TRIM(input_bayid) AS INTEGER);
+	EXCEPTION
+		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
+	END;
+$$ LANGUAGE plpgsql;
+
+
 /* Return bays matching a search term*/
 --SELECT * FROM search_bays('point');
-DROP FUNCTION IF EXISTS search_bays(search_term TEXT);
+--DROP FUNCTION IF EXISTS search_bays(search_term TEXT);
 CREATE OR REPLACE FUNCTION search_bays(search_term TEXT)
 	RETURNS TABLE(name_result carbay.name%TYPE, address_result carbay.address%TYPE, count_result INTEGER)
 AS $$
@@ -41,10 +103,29 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 
+
+
+/* Returns a list of bookings a user has made using given email*/
+--DROP FUNCTION IF EXISTS get_all_bookings(member_email TEXT);
+CREATE OR REPLACE FUNCTION get_all_bookings(member_email TEXT)
+	RETURNS TABLE(regno_result Booking.car%TYPE, carName_result Car.name%TYPE, starttimeDate_result DATE, starttimeHour_result INTEGER, duration_result INTEGER, whenBookedDate_result DATE)
+AS $$
+	BEGIN
+		RETURN QUERY
+			SELECT car, name, starttime::date, CAST(EXTRACT(hour FROM starttime) AS INT), CAST(EXTRACT(epoch FROM endtime-starttime)/3600 AS INT), whenbooked::date
+			FROM Member INNER JOIN Booking ON (memberno = madeby)
+			INNER JOIN Car ON (car = regno)
+			WHERE email = member_email OR nickname = member_email
+			ORDER BY starttime::date DESC;
+	END;
+$$ LANGUAGE plpgsql;
+
+
+
 /* Attempt to make booking and return whether successful*/
 --SELECT * FROM booking WHERE madeby = 1 ORDER BY whenbooked DESC;
 --SELECT * FROM make_booking('drfoster', 'BJN71S', '2022-07-01', '5', '12');
-DROP FUNCTION IF EXISTS make_booking(TEXT, TEXT, TEXT, TEXT, TEXT);
+--DROP FUNCTION IF EXISTS make_booking(TEXT, TEXT, TEXT, TEXT, TEXT);
 CREATE OR REPLACE FUNCTION make_booking(raw_email TEXT, 
 					raw_regno TEXT, 
 					raw_booking_date TEXT, 
@@ -132,7 +213,7 @@ AS $$
 $$ LANGUAGE plpgsql;
 
 /* Get number of bookins stat of user */
-DROP FUNCTION IF EXISTS get_num_bookings(raw_email TEXT);
+--DROP FUNCTION IF EXISTS get_num_bookings(raw_email TEXT);
 CREATE OR REPLACE FUNCTION get_num_bookings(raw_email TEXT)
 	RETURNS INTEGER
 AS $$

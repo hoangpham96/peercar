@@ -47,32 +47,34 @@ def check_login(email, password):
 
     try:
         sql = """SELECT *
-                 FROM Member
-                 WHERE email=%s OR nickname =%s"""
-        cur.execute(sql, (email, email))
+                 FROM login(%s)"""
+        cur.execute(sql, (email,))
         result = cur.fetchone()
+        conn.commit()
         cur.close()
         conn.close()
 
-        if (result is None):
+        if (result is None or len(result) < 1):
             return None
 
-        # Stored hash includes salt and hash of password
-        stored_hash = result[3].encode(encoding='ascii')
-        pwd = password.encode(encoding = 'ascii')
+        #Convert hashing components to the b'' type
+        stored_salt = result[1].encode(encoding = 'ascii')
+        password = password.encode(encoding = 'ascii')
 
-        if (bcrypt.hashpw(pwd, stored_hash) == stored_hash):
+        #Taking the last 31 characters of the output because bcrypt is interesting.
+        input_hash = (bcrypt.hashpw(password, stored_salt).decode('ascii'))[29:]
+        stored_hash = result[0]
+
+        if ( input_hash == stored_hash):
             return result
         else:
             return None
         
     except:
         print("Error with Database")
-
-    cur.close()
-    conn.close()
-
-    return None
+        conn.rollback()
+        cur.close()
+        conn.close()
 
 
 #####################################################
@@ -89,14 +91,6 @@ def update_homebay(email, bayname):
 
 def make_booking(email, car_rego, date, hour, duration):
     print('%s, %s, %s, %s, %s' % (email, car_rego, date, hour, duration))
-    # TODO
-    # Insert a new booking
-    # Make sure to check for:
-    #       - If the member already has booked at that time
-    #       - If there is another booking that overlaps
-    #       - Etc.
-    # return False if booking was unsuccessful :)
-    # We want to make sure we check this thoroughly
 
     # #Ask for the database connection, and get the cursor set up
     conn = database_connect()
@@ -137,13 +131,8 @@ def get_all_bookings(email):
     cur = conn.cursor()
 
     try:
-        sql = """SELECT car, name, whenbooked::date, CAST(EXTRACT(hour FROM whenbooked) AS INT)
-                 FROM Member INNER JOIN Booking ON (memberno = madeby)
-                 INNER JOIN Car ON (car = regno)
-                 WHERE email=%s OR nickname =%s
-                 ORDER BY whenbooked::date DESC"""
-
-        cur.execute(sql, (email,email))
+        sql = """SELECT * FROM get_all_bookings(%s)"""
+        cur.execute(sql, (email,))
         result = cur.fetchall()
         cur.close()
         conn.close()
@@ -159,41 +148,40 @@ def get_all_bookings(email):
     return None
 
 
-
 def get_booking(b_date, b_hour, car):
-
-    # Get the information about a certain booking
-    # It has to have the combination of date, hour and car
-
-    conn = database_connect()
-    if(conn is None):
-        return ERROR_CODE
-    cur = conn.cursor()
-
-    try:
-        sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
-                 EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
-                 FROM member INNER JOIN booking ON (madeby = memberno)
-                 INNER JOIN car ON (car = regno)
-                 INNER JOIN carbay ON (parkedat = bayid)
-                 WHERE whenbooked::date = %s
-                 AND EXTRACT(hour from whenbooked) = %s
-                 AND car = %s"""
-
-        cur.execute(sql, (b_date, b_hour, car))
-        result = cur.fetchone()
-        cur.close()
-        conn.close()
-
-        return result
-
-    except:
-        print("Error with Database")
-
-    cur.close()
-    conn.close()
-
-    return None
+ 
+     # Get the information about a certain booking
+     # It has to have the combination of date, hour and car
+ 
+     conn = database_connect()
+     if(conn is None):
+         return ERROR_CODE
+     cur = conn.cursor()
+ 
+     try:
+         sql = """SELECT namegiven, car, car.name, starttime::date, EXTRACT(hour FROM whenbooked),
+                  EXTRACT(epoch FROM endtime-starttime)/3600, whenbooked::date, carbay.name
+                  FROM member INNER JOIN booking ON (madeby = memberno)
+                  INNER JOIN car ON (car = regno)
+                  INNER JOIN carbay ON (parkedat = bayid)
+                  WHERE whenbooked::date = %s
+                  AND EXTRACT(hour from whenbooked) = %s
+                  AND car = %s"""
+ 
+         cur.execute(sql, (b_date, b_hour, car))
+         result = cur.fetchone()
+         cur.close()
+         conn.close()
+ 
+         return result
+ 
+     except:
+         print("Error with Database")
+ 
+     cur.close()
+     conn.close()
+ 
+     return None
 
 
 #####################################################
@@ -431,8 +419,41 @@ def get_num_bookings(email):
         
     except:
         print("Error with Database")
+        conn.rollback()
         cur.close()                     # Close the cursor
         conn.close()                    # Close the connection to the db
     
         return None
 
+def get_bayname(bayid):
+
+    # Ask for the database connection, and get the cursor set up
+    conn = database_connect()
+    if(conn is None):
+        return ERROR_CODE
+    cur = conn.cursor()
+
+    try:
+        # Try executing the SQL and get from the database
+        sql = """SELECT * 
+                    FROM get_bayname(%s)"""
+        cur.execute(sql, (bayid,))
+        result = cur.fetchone()
+
+        conn.commit()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+        
+
+        if (result is None or len(result) < 1):
+            return None
+
+        return result[0]
+        
+    except:
+        print("Error with Database")
+        conn.rollback()
+        cur.close()                     # Close the cursor
+        conn.close()                    # Close the connection to the db
+    
+        return None
