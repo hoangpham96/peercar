@@ -306,3 +306,64 @@ AS $$
 		WHEN OTHERS THEN RETURN NULL;
 	END;
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION carsharing.get_booking(
+    IN input_date text,
+    IN input_hour text,
+    IN input_regno text)
+  RETURNS TABLE(full_name text, car_reg regotype, car_name character varying, start_date date, start_hour integer, duration integer, booked_date date, carbay_name character varying) 
+  AS $$
+	
+	DECLARE
+		booking_date date;
+		booking_hour integer;	
+	BEGIN
+		booking_date := input_date;
+		booking_hour := input_hour;
+
+		
+		RETURN QUERY
+			SELECT CAST((m.nametitle || ', ' || m.namegiven || ' ' || namefamily) AS TEXT),
+				c.regno, c.name, CAST(starttime AS DATE), CAST(EXTRACT(hour FROM starttime) AS INT), CAST(EXTRACT(epoch FROM endtime-starttime)/3600 AS INT),
+				CAST(whenbooked AS DATE), cb.name
+			FROM member m INNER JOIN booking b ON (madeby = memberno)
+			INNER JOIN car c ON (car = regno)
+			INNER JOIN carbay cb ON (parkedat = bayid)
+			WHERE starttime::date = booking_date
+			AND CAST(EXTRACT(hour from starttime) AS INT) = booking_hour
+			AND car = input_regno;
+	EXCEPTION
+		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
+	END;
+$$ LANGUAGE plpgsql;
+
+/* Get number of bookins stat of user */
+--DROP FUNCTION IF EXISTS get_car_details(input_regno TEXT);
+CREATE OR REPLACE FUNCTION carsharing.get_car_details(input_regno TEXT)
+	RETURNS TABLE( out_regno car.regno%TYPE,
+			out_name car.name%TYPE,
+			out_make car.make%TYPE,
+			out_model car.model%TYPE,
+			out_year car.year%TYPE,
+			out_transmission car.transmission%TYPE,
+			out_category carmodel.category%TYPE,
+			out_capacity carmodel.capacity%TYPE,
+			out_bayname carbay.name%TYPE,
+			out_walkscore carbay.walkscore%TYPE,
+			out_mapurl carbay.mapurl%TYPE)
+AS $$
+	DECLARE
+		car_regno car.regno%TYPE;
+	BEGIN
+		car_regno := TRIM(input_regno);
+
+		RETURN QUERY SELECT regno, C.name, make, model, year, transmission, category, capacity, CB.name, walkscore, mapurl
+                 FROM (Car C INNER JOIN CarModel CM USING (make, model))
+                             INNER JOIN Carbay CB ON (C.parkedat = CB.bayid)
+                 WHERE regno = car_regno;
+
+	EXCEPTION
+		WHEN OTHERS THEN RETURN QUERY SELECT NULL;
+	END;
+$$ LANGUAGE plpgsql;
