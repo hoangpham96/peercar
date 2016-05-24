@@ -117,7 +117,7 @@ def list_cars():
         flash("Error, car \'{}\' does not exist".format(car))
         page['bar'] = False
 
-    return render_template('car_detail.html', car=val, session=session)
+    return render_template('car_detail.html', car=val, session=session, page=page)
 
 #####################################################
 ##  LIST BAYS
